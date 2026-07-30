@@ -1,0 +1,32 @@
+<section class="state-card" *ngIf="store.data?.sessions?.length; else noAttendanceSessions">
+  <h2 class="section-title">Attendance Matrix</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th *ngFor="let session of store.sortedSessions">{{ session.date }}<br><small>Rs {{ session.cost | number:'1.0-0' }}</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let member of store.data?.members">
+          <td>{{ member }}</td>
+          <td *ngFor="let session of store.sortedSessions">
+            <button class="att-btn" [class.present]="store.isPresent(session.id, member)" (click)="store.toggleAttendance(session.id, member)">
+              {{ store.isPresent(session.id, member) ? '✓' : '' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Attendees</td>
+          <td *ngFor="let session of store.sortedSessions">{{ store.attendeesCount(session.id) }} players</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</section>
+<ng-template #noAttendanceSessions>
+  <section class="state-card"><p>No sessions yet.</p></section>
+</ng-template>

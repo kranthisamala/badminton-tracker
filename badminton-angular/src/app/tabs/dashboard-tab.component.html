@@ -1,0 +1,84 @@
+<section class="state-card">
+  <h2 class="section-title">Dashboard</h2>
+  <p class="dashboard-subtitle">Core insights from sessions, attendance, and settlement balances.</p>
+</section>
+
+<section class="dashboard-grid">
+
+  <article class="state-card chart-card dashboard-chart-card" [class.chart-card--expanded]="expandedCard === 'spendTrend'">
+    <div class="chart-card-head">
+      <h3>Spend Trend by Session</h3>
+      <div class="chart-card-actions">
+        <span class="chart-drilldown-hint">Click point → Sessions</span>
+        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'spendTrend' ? collapseCard() : expandCard('spendTrend')" [attr.aria-label]="expandedCard === 'spendTrend' ? 'Collapse chart' : 'Expand chart'">
+          {{ expandedCard === 'spendTrend' ? '⛶' : '⛶' }}
+          {{ expandedCard === 'spendTrend' ? 'Collapse' : 'Expand' }}
+        </button>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas #spendTrendCanvas></canvas>
+    </div>
+  </article>
+
+  <article class="state-card chart-card dashboard-chart-card" [class.chart-card--expanded]="expandedCard === 'attendance'">
+    <div class="chart-card-head">
+      <h3>Attendance by Session</h3>
+      <div class="chart-card-actions">
+        <span class="chart-drilldown-hint">Click bar → Attendance</span>
+        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'attendance' ? collapseCard() : expandCard('attendance')">
+          {{ expandedCard === 'attendance' ? 'Collapse' : 'Expand' }}
+        </button>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas #attendanceCanvas></canvas>
+    </div>
+  </article>
+
+  <article class="state-card chart-card dashboard-chart-card" [class.chart-card--expanded]="expandedCard === 'attendanceRate'">
+    <div class="chart-card-head">
+      <h3>Member Attendance Rate</h3>
+      <div class="chart-card-actions">
+        <span class="chart-drilldown-hint">Click member → View report</span>
+        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'attendanceRate' ? collapseCard() : expandCard('attendanceRate')">
+          {{ expandedCard === 'attendanceRate' ? 'Collapse' : 'Expand' }}
+        </button>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas #attendanceRateCanvas></canvas>
+    </div>
+  </article>
+
+  <article class="state-card chart-card dashboard-chart-card" [class.chart-card--expanded]="expandedCard === 'payOwe'">
+    <div class="chart-card-head">
+      <h3>Pay vs Owe by Member</h3>
+      <div class="chart-card-actions">
+        <span class="chart-drilldown-hint">Click member → View report</span>
+        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'payOwe' ? collapseCard() : expandCard('payOwe')">
+          {{ expandedCard === 'payOwe' ? 'Collapse' : 'Expand' }}
+        </button>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas #payOweCanvas></canvas>
+    </div>
+  </article>
+
+  <article class="state-card chart-card dashboard-chart-card full-width" [class.chart-card--expanded]="expandedCard === 'balance'">
+    <div class="chart-card-head">
+      <h3>Net Balance by Member</h3>
+      <div class="chart-card-actions">
+        <span class="chart-drilldown-hint">Click member → View report</span>
+        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'balance' ? collapseCard() : expandCard('balance')">
+          {{ expandedCard === 'balance' ? 'Collapse' : 'Expand' }}
+        </button>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas #balanceCanvas></canvas>
+    </div>
+  </article>
+
+</section>

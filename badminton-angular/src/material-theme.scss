@@ -1,0 +1,98 @@
+// ─────────────────────────────────────────────────────────────────────────────
+//  Badminton Tracker — Angular Material custom theme
+//  Uses Angular Material SASS theming API (M2) with a hand-crafted dark theme
+//  that matches the project's green-on-dark colour palette exactly.
+// ─────────────────────────────────────────────────────────────────────────────
+@use '@angular/material' as mat;
+
+// ── 1. Material core (typography, ripple, etc.) ────────────────────────────
+@include mat.core();
+
+// ── 2. Custom green palette (Tailwind green, matching #4ade80 = green-400) ─
+$tracker-green: (
+  50:   #f0fdf4,
+  100:  #dcfce7,
+  200:  #bbf7d0,
+  300:  #86efac,
+  400:  #4ade80,   // ← primary brand green used throughout the app
+  500:  #22c55e,
+  600:  #16a34a,
+  700:  #15803d,
+  800:  #166534,
+  900:  #14532d,
+  A100: #dcfce7,
+  A200: #86efac,
+  A400: #4ade80,
+  A700: #22c55e,
+  contrast: (
+    50:   rgba(0, 0, 0, 0.87),
+    100:  rgba(0, 0, 0, 0.87),
+    200:  rgba(0, 0, 0, 0.87),
+    300:  rgba(0, 0, 0, 0.87),
+    400:  rgba(0, 0, 0, 0.87),   // dark text on green-400
+    500:  white,
+    600:  white,
+    700:  white,
+    800:  white,
+    900:  white,
+    A100: rgba(0, 0, 0, 0.87),
+    A200: rgba(0, 0, 0, 0.87),
+    A400: rgba(0, 0, 0, 0.87),
+    A700: rgba(0, 0, 0, 0.87),
+  ),
+);
+
+// ── 3. Custom red palette for warn (matching #f87171 = red-400 Tailwind) ───
+$tracker-red: (
+  50:   #fef2f2,
+  100:  #fee2e2,
+  200:  #fecaca,
+  300:  #fca5a5,
+  400:  #f87171,   // ← danger/warn colour
+  500:  #ef4444,
+  600:  #dc2626,
+  700:  #b91c1c,
+  800:  #991b1b,
+  900:  #7f1d1d,
+  A100: #fee2e2,
+  A200: #fecaca,
+  A400: #f87171,
+  A700: #ef4444,
+  contrast: (
+    50:   rgba(0, 0, 0, 0.87),
+    100:  rgba(0, 0, 0, 0.87),
+    200:  rgba(0, 0, 0, 0.87),
+    300:  rgba(0, 0, 0, 0.87),
+    400:  rgba(0, 0, 0, 0.87),
+    500:  white,
+    600:  white,
+    700:  white,
+    800:  white,
+    900:  white,
+    A100: rgba(0, 0, 0, 0.87),
+    A200: rgba(0, 0, 0, 0.87),
+    A400: rgba(0, 0, 0, 0.87),
+    A700: white,
+  ),
+);
+
+// ── 4. Define Angular Material palettes ────────────────────────────────────
+$primary: mat.define-palette($tracker-green, 400, 300, 600);
+$accent:  mat.define-palette($tracker-green, 300, 200, 400);
+$warn:    mat.define-palette($tracker-red,   400, 300, 600);
+
+// ── 5. Build the dark theme ────────────────────────────────────────────────
+$dark-theme: mat.define-dark-theme((
+  color: (
+    primary: $primary,
+    accent:  $accent,
+    warn:    $warn,
+  ),
+  typography: mat.define-typography-config(
+    $font-family: "'Segoe UI', sans-serif",
+  ),
+  density: 0,
+));
+
+// ── 6. Emit theme styles for every Material component ─────────────────────
+@include mat.all-component-themes($dark-theme);

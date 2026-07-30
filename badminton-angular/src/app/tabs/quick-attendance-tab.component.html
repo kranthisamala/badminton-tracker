@@ -1,0 +1,58 @@
+<section class="state-card">
+  <h2 class="section-title">Quick Attendance</h2>
+
+  <!-- Session selector -->
+  <mat-form-field appearance="outline" class="quick-field" style="margin-bottom:12px">
+    <mat-label>Session</mat-label>
+    <mat-select [ngModel]="store.quickAttendanceSessionId" (ngModelChange)="onSessionChange($event)">
+      <mat-option *ngFor="let session of store.sortedSessions" [value]="session.id">
+        {{ session.date }} (Rs {{ session.cost | number:'1.0-0' }})
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Single search + chip field -->
+  <div #memberChipWrapper>
+  <mat-form-field appearance="outline" class="quick-field member-chip-field">
+    <mat-label>Members in Session ({{ store.quickSessionAttendees.length }} / {{ store.data?.members?.length || 0 }})</mat-label>
+
+    <!-- Already-in-session members shown as removable chips -->
+    <mat-chip-grid #chipGrid aria-label="Session members">
+      <mat-chip
+        *ngFor="let member of store.quickSessionAttendees"
+        (removed)="removeFromSession(member)"
+        class="member-chip">
+        {{ member }}
+        <button matChipRemove aria-label="Remove">×</button>
+      </mat-chip>
+    </mat-chip-grid>
+
+    <!-- Search input -->
+    <input
+      #memberInput
+      matInput
+      [ngModel]="store.quickAttendanceQuery"
+      (ngModelChange)="store.quickAttendanceQuery = $event"
+      [matChipInputFor]="chipGrid"
+      [matAutocomplete]="membersAuto"
+      placeholder="Search to add member…" />
+
+    <!-- Autocomplete panel -->
+    <mat-autocomplete
+      #membersAuto="matAutocomplete"
+      [panelWidth]="memberPickerWidth"
+      (optionSelected)="onOptionSelected($event)">
+      <mat-option
+        *ngFor="let member of store.quickAttendanceDropdownMembers"
+        [value]="member"
+        class="member-ac-option">
+        {{ member }}
+      </mat-option>
+      <mat-option *ngIf="!store.quickAttendanceDropdownMembers.length" disabled class="member-ac-empty">
+        All members added
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+  </div>
+
+</section>

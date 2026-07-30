@@ -1,0 +1,31 @@
+<section class="state-card">
+  <h2 class="section-title">Current Members ({{ store.data?.members?.length || 0 }})</h2>
+  <div class="chip-grid" *ngIf="store.data?.members?.length; else noMembers">
+    <div class="chip" *ngFor="let member of store.data?.members">
+      <span>{{ member }}</span>
+      <div class="chip-actions">
+        <button mat-stroked-button (click)="openMemberReport(member)">Report</button>
+        <button mat-stroked-button (click)="store.renameMember(member)">Rename</button>
+        <button mat-stroked-button color="warn" (click)="store.removeMember(member)">Remove</button>
+      </div>
+    </div>
+  </div>
+  <ng-template #noMembers><p>No members available.</p></ng-template>
+</section>
+
+<section class="state-card">
+  <h2 class="section-title">Add New Member</h2>
+  <div class="tab-form-grid">
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Name</mat-label>
+      <input matInput type="text" [(ngModel)]="store.newMemberName"
+        (keydown.enter)="store.addMember()" placeholder="Enter player name" />
+    </mat-form-field>
+  </div>
+  <div class="actions-row">
+    <button mat-flat-button color="primary" (click)="store.addMember()">Add Member</button>
+  </div>
+</section>
+
+<app-member-report-modal *ngIf="showMemberReportModal && selectedMemberReport"
+  [report]="selectedMemberReport" (closed)="closeMemberReport()"></app-member-report-modal>

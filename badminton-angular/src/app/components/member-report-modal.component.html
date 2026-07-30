@@ -1,0 +1,106 @@
+<div class="modal-overlay no-print" (click)="close()">
+  <section class="modal-card member-report-modal" role="dialog" aria-modal="true" [attr.aria-label]="report.name + ' report'" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <h3>{{ report.name }} Report</h3>
+        <p class="dashboard-subtitle">Attendance, payment history, and current standing.</p>
+      </div>
+      <button class="ghost-btn" type="button" (click)="close()">Close</button>
+    </div>
+
+    <section class="member-report-stats">
+      <article class="state-card compact-stat">
+        <span>Sessions Attended</span>
+        <strong>{{ report.sessionsAttended }}</strong>
+      </article>
+      <article class="state-card compact-stat">
+        <span>Attendance Rate</span>
+        <strong>{{ report.attendanceRate | number:'1.0-1' }}%</strong>
+      </article>
+      <article class="state-card compact-stat">
+        <span>Total Paid Out</span>
+        <strong>Rs {{ report.totalPaid | number:'1.0-0' }}</strong>
+      </article>
+      <article class="state-card compact-stat">
+        <span>Net Balance</span>
+        <strong [class.receive-text]="report.netBalance > 0.5" [class.owe-text]="report.netBalance < -0.5">
+          {{ report.netBalance > 0.5 ? 'Rs ' + (report.netBalance | number:'1.0-0') + ' to receive' : report.netBalance < -0.5 ? 'Owes Rs ' + ((report.netBalance * -1) | number:'1.0-0') : 'Settled Up' }}
+        </strong>
+      </article>
+    </section>
+
+    <section class="dashboard-grid inline-top-12">
+      <article class="state-card chart-card">
+        <h3>Attendance Mix</h3>
+        <canvas #attendanceMixCanvas></canvas>
+      </article>
+
+      <article class="state-card chart-card">
+        <h3>Payments and Dues Paid</h3>
+        <canvas #paymentsCanvas></canvas>
+      </article>
+    </section>
+
+    <section class="report-sections-grid inline-top-12">
+      <article class="state-card">
+        <h3 class="section-title">Dates Attended ({{ report.attendedSessions.length }})</h3>
+        <div class="session-list" *ngIf="report.attendedSessions.length; else noAttendance">
+          <article class="session-card" *ngFor="let session of report.attendedSessions">
+            <div class="session-head">
+              <div>
+                <h3>{{ store.formatDate(session.date) }}</h3>
+                <p *ngIf="session.notes">{{ session.notes }}</p>
+              </div>
+              <div class="session-cost">
+                <span>Session #{{ session.sessionId }}</span>
+                <strong>Rs {{ session.cost | number:'1.0-0' }}</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+        <ng-template #noAttendance>
+          <p>No attendance recorded yet.</p>
+        </ng-template>
+      </article>
+
+      <article class="state-card">
+        <h3 class="section-title">Payments Made Including Dues ({{ report.payments.length }})</h3>
+        <div class="table-wrap" *ngIf="report.payments.length; else noPayments">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Reference</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let payment of report.payments">
+                <td>{{ store.formatDate(payment.date) }}</td>
+                <td>{{ payment.kind === 'session' ? 'Session Payment' : 'Dues Paid' }}</td>
+                <td>{{ payment.label }}</td>
+                <td>Rs {{ payment.amount | number:'1.0-0' }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td>Totals</td>
+                <td>
+                  Session Payments: Rs {{ report.sessionPaid | number:'1.0-0' }}
+                  <br />
+                  Dues Paid: Rs {{ report.duesPaid | number:'1.0-0' }}
+                </td>
+                <td>Rs {{ report.totalPaid | number:'1.0-0' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <ng-template #noPayments>
+          <p>No payments or dues paid recorded yet.</p>
+        </ng-template>
+      </article>
+    </section>
+  </section>
+</div>

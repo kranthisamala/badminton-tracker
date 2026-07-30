@@ -1,0 +1,40 @@
+<main class="page">
+  <header class="page-header">
+    <h1>Badminton Tracker</h1>
+    <!-- <p>Feature migration in progress</p> -->
+  </header>
+
+  <nav class="tabs" *ngIf="!store.loading && !store.errorMessage">
+    <button class="tab" [class.active]="activeTab === 'summary'" (click)="selectTab('summary')">Summary</button>
+    <button class="tab" [class.active]="activeTab === 'dashboard'" (click)="selectTab('dashboard')">Dashboard</button>
+    <button class="tab" [class.active]="activeTab === 'quick-attendance'" (click)="selectTab('quick-attendance')">Quick Attendance</button>
+    <button class="tab" [class.active]="activeTab === 'attendance'" (click)="selectTab('attendance')">Attendance</button>
+    <button class="tab" [class.active]="activeTab === 'sessions'" (click)="selectTab('sessions')">Sessions</button>
+    <button class="tab" [class.active]="activeTab === 'dues'" (click)="selectTab('dues')">Dues</button>
+    <button class="tab" [class.active]="activeTab === 'members'" (click)="selectTab('members')">Members</button>
+  </nav>
+
+  <section *ngIf="store.loading" class="state-card">
+    <p>Loading data...</p>
+  </section>
+
+  <section class="toast-stack no-print" *ngIf="!store.loading && (store.errorMessage || store.successMessage)">
+    <article class="toast toast-error" *ngIf="store.errorMessage" role="status" aria-live="polite">
+      <p>{{ store.errorMessage }}</p>
+      <button class="ghost-btn toast-close" (click)="dismissError()" aria-label="Dismiss error notification">×</button>
+    </article>
+
+    <article class="toast toast-success" *ngIf="store.successMessage" role="status" aria-live="polite">
+      <p>{{ store.successMessage }}</p>
+      <button class="ghost-btn toast-close" (click)="dismissSuccess()" aria-label="Dismiss success notification">×</button>
+    </article>
+  </section>
+
+  <app-summary-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'summary'"></app-summary-tab>
+  <app-dashboard-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dashboard'" (drilldown)="onDashboardDrilldown($event)"></app-dashboard-tab>
+  <app-quick-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'quick-attendance'"></app-quick-attendance-tab>
+  <app-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'attendance'"></app-attendance-tab>
+  <app-sessions-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'sessions'"></app-sessions-tab>
+  <app-dues-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dues'"></app-dues-tab>
+  <app-members-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'members'"></app-members-tab>
+</main>

@@ -1,0 +1,93 @@
+<section class="total-card">
+  <span>Total Spent Across All Sessions</span>
+  <strong>Rs {{ store.totalSessions | number:'1.0-0' }}</strong>
+</section>
+
+<section class="summary-actions no-print">
+  <button class="ghost-btn" (click)="copySummary()">Copy</button>
+  <button class="ghost-btn" (click)="printSummary()">Print</button>
+</section>
+
+<section class="summary-grid">
+  <article class="player-card" *ngFor="let player of store.summary">
+    <div class="player-card-head">
+      <h2>{{ player.name }}</h2>
+      <div class="summary-card-menu">
+        <button class="card-menu-trigger ghost-btn" type="button" (click)="toggleActionMenu(player.name, $event)" aria-label="Open member actions">
+          ⋮
+        </button>
+        <div class="card-menu" *ngIf="actionMenuMember === player.name">
+          <button type="button" (click)="openMemberReport(player.name)">View Report</button>
+          <button type="button" *ngIf="isOwing(player.balance)" (click)="openQuickDuesFromMenu(player.name)">Record Dues</button>
+        </div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <span>Share Owed</span>
+      <span>Rs {{ player.owed | number:'1.0-0' }}</span>
+    </div>
+    <div class="stat-row">
+      <span>Session Paid</span>
+      <span>Rs {{ player.paid | number:'1.0-0' }}</span>
+    </div>
+    <div class="stat-row" *ngIf="player.duesPaid > 0">
+      <span>Dues Paid</span>
+      <span>Rs {{ player.duesPaid | number:'1.0-0' }}</span>
+    </div>
+
+    <p class="balance receive" *ngIf="isReceiving(player.balance)">
+      Rs {{ player.balance | number:'1.0-0' }} to receive
+    </p>
+    <p class="balance owe" *ngIf="isOwing(player.balance)">
+      Owes Rs {{ (player.balance * -1) | number:'1.0-0' }}
+    </p>
+    <p class="balance settled" *ngIf="isSettled(player.balance)">
+      Settled Up
+    </p>
+
+  </article>
+</section>
+
+<app-member-report-modal *ngIf="showMemberReportModal && selectedMemberReport" [report]="selectedMemberReport" (closed)="closeMemberReport()"></app-member-report-modal>
+
+<div class="modal-overlay no-print" *ngIf="showQuickDuesModal" (click)="closeQuickDuesModal()">
+  <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="'Record dues for ' + quickDuesMember" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <h3>Record Dues for {{ quickDuesMember }}</h3>
+      <button class="ghost-btn" type="button" (click)="closeQuickDuesModal()">Close</button>
+    </div>
+
+    <div class="form-grid">
+      <label>
+        Paid By
+        <select [(ngModel)]="store.duesFrom">
+          <option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</option>
+        </select>
+      </label>
+      <label>
+        Paid To
+        <select [(ngModel)]="store.duesTo">
+          <option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</option>
+        </select>
+      </label>
+      <label>
+        Amount
+        <input #quickAmountInput type="number" min="0" [(ngModel)]="store.duesAmount" />
+      </label>
+      <label>
+        Date
+        <input type="date" [(ngModel)]="store.duesDate" />
+      </label>
+    </div>
+
+    <label class="dues-note">
+      Note (optional)
+      <input type="text" [(ngModel)]="store.duesNote" placeholder="e.g. UPI transfer" />
+    </label>
+
+    <div class="actions-row">
+      <button class="primary-btn" type="button" (click)="submitQuickDues()">Record Payment</button>
+      <button class="ghost-btn" type="button" (click)="closeQuickDuesModal()">Cancel</button>
+    </div>
+  </section>
+</div>

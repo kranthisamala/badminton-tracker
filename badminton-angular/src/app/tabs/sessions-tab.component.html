@@ -1,0 +1,127 @@
+<section class="state-card">
+  <h2 class="section-title">Add New Session</h2>
+
+  <div class="tab-form-grid">
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="sessionDatePicker"
+        [(ngModel)]="sessionDateValue"
+        (ngModelChange)="onDateSelected($event)"
+        [value]="sessionDateValue"
+        placeholder="Pick a date" readonly />
+      <mat-hint *ngIf="store.newSessionDate">{{ store.newSessionDate }}</mat-hint>
+      <mat-datepicker-toggle matIconSuffix [for]="sessionDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #sessionDatePicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Notes (optional)</mat-label>
+      <input matInput type="text" [(ngModel)]="store.newSessionNotes" placeholder="e.g. Extra shuttle used" />
+    </mat-form-field>
+  </div>
+
+  <div class="payments-box">
+    <div class="payments-head">
+      <span>Paid By</span>
+      <span class="cost">Total: Rs {{ store.sessionCost | number:'1.0-0' }}</span>
+    </div>
+
+    <div class="payment-row" *ngFor="let payment of store.newSessionPayments; let i = index">
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Player</mat-label>
+        <mat-select [(ngModel)]="payment.player">
+          <mat-option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Amount (Rs)</mat-label>
+        <input matInput type="number" min="0" [(ngModel)]="payment.amount" placeholder="Amount" />
+      </mat-form-field>
+
+      <button mat-stroked-button (click)="store.removePaymentRow(i)" [disabled]="store.newSessionPayments.length === 1">Remove</button>
+    </div>
+
+    <button mat-stroked-button style="margin-top:8px" (click)="store.addPaymentRow()">+ Add payer</button>
+  </div>
+
+  <div class="actions-row">
+    <button mat-flat-button color="primary" (click)="store.addSession()">Save Session</button>
+  </div>
+</section>
+
+<section class="state-card">
+  <h2 class="section-title">Session History ({{ store.data?.sessions?.length || 0 }})</h2>
+  <div class="session-list" *ngIf="store.data?.sessions?.length; else noSessions">
+    <article class="session-card" *ngFor="let session of store.sortedSessions">
+
+      <!-- View mode -->
+      <ng-container *ngIf="editingSessionId !== session.id">
+        <div class="session-head">
+          <div>
+            <h3>{{ session.date }}</h3>
+            <p *ngIf="session.notes">{{ session.notes }}</p>
+          </div>
+          <div class="session-cost">
+            <strong>Rs {{ session.cost | number:'1.0-0' }}</strong>
+            <button mat-stroked-button (click)="startEdit(session)">Edit</button>
+            <button mat-stroked-button color="warn" (click)="store.deleteSession(session.id)">Delete</button>
+          </div>
+        </div>
+        <div class="payment-line" *ngFor="let payment of session.payments">
+          <span>{{ payment.player }} paid</span>
+          <span>Rs {{ payment.amount | number:'1.0-0' }}</span>
+        </div>
+      </ng-container>
+
+      <!-- Edit mode -->
+      <ng-container *ngIf="editingSessionId === session.id">
+        <div class="session-edit-head">
+          <span class="session-edit-label">Editing Session #{{ session.id }}</span>
+          <div class="session-cost">
+            <strong>Rs {{ editSessionCost | number:'1.0-0' }}</strong>
+          </div>
+        </div>
+
+        <div class="tab-form-grid session-edit-grid">
+          <mat-form-field appearance="outline" class="tab-field">
+            <mat-label>Date</mat-label>
+            <input matInput type="text" [(ngModel)]="editDate" placeholder="e.g. 17th July" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="tab-field">
+            <mat-label>Notes (optional)</mat-label>
+            <input matInput type="text" [(ngModel)]="editNotes" placeholder="e.g. Extra shuttle used" />
+          </mat-form-field>
+        </div>
+
+        <div class="payments-box">
+          <div class="payments-head">
+            <span>Paid By</span>
+            <span class="cost">Total: Rs {{ editSessionCost | number:'1.0-0' }}</span>
+          </div>
+          <div class="payment-row" *ngFor="let payment of editPayments; let i = index">
+            <mat-form-field appearance="outline" class="tab-field">
+              <mat-label>Player</mat-label>
+              <mat-select [(ngModel)]="payment.player">
+                <mat-option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="tab-field">
+              <mat-label>Amount (Rs)</mat-label>
+              <input matInput type="number" min="0" [(ngModel)]="payment.amount" placeholder="Amount" />
+            </mat-form-field>
+            <button mat-stroked-button (click)="removeEditPaymentRow(i)" [disabled]="editPayments.length === 1">Remove</button>
+          </div>
+          <button mat-stroked-button style="margin-top:8px" (click)="addEditPaymentRow()">+ Add payer</button>
+        </div>
+
+        <div class="actions-row session-edit-actions">
+          <button mat-flat-button color="primary" (click)="saveEdit()">Save Changes</button>
+          <button mat-stroked-button (click)="cancelEdit()">Cancel</button>
+        </div>
+      </ng-container>
+
+    </article>
+  </div>
+  <ng-template #noSessions><p>No sessions yet.</p></ng-template>
+</section>

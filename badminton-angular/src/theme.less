@@ -1,0 +1,53 @@
+// ─────────────────────────────────────────────────────────
+//  Badminton Tracker — Design Tokens
+//  Single source of truth for all colors used in the app.
+//  Import this file in styles.less and any component .less file.
+// ─────────────────────────────────────────────────────────
+
+// ── Backgrounds
+@bg-page:           #0d0f0e;   // deepest background (body)
+@bg-card:           #161a18;   // card / panel surface
+@bg-input:          #1e2421;   // input / select background
+
+// ── Borders
+@border-base:       #2a332e;   // default border
+@border-focus:      #4ade80;   // focused / active border (= accent)
+
+// ── Text
+@text-main:         #e8f0eb;   // primary readable text
+@text-soft:         #d8e4dc;   // slightly dimmed text
+@text-muted:        #8aa090;   // labels, placeholders, secondary text
+@text-neutral:      #9bb0a2;   // mid-tone neutral text
+
+// ── Accent (green)
+@accent:            #4ade80;   // primary brand green
+@accent-light:      #86efac;   // lighter green (success, hover)
+@surface-strong:    #0d3320;   // dark green fill (active states)
+
+// ── Danger (red)
+@danger:            #f87171;   // error / delete text
+@danger-bg:         #3f1212;   // error / delete background
+@danger-border:     #7f2020;   // error / delete border
+
+// ── Success
+@success:           #86efac;
+@success-border:    #1f5c38;
+
+// ── Overlay & misc
+@overlay:           rgba(5, 8, 6, 0.72);
+@quick-action-bg:   #202725;
+@quick-action-border: #3a4742;
+@quick-action-text: #c8d8ce;
+
+// ── Material CSS variable mappings (used in styles.less overrides)
+@mat-outline-color:       @border-base;
+@mat-outline-focus-color: @accent;
+@mat-label-color:         @text-muted;
+@mat-label-focus-color:   @accent;
+@mat-input-text-color:    @text-main;
+@mat-select-arrow-color:  @text-muted;
+@mat-panel-bg:            @bg-card;
+@mat-option-hover-bg:     rgba(74, 222, 128, 0.08);
+@mat-option-selected-bg:  rgba(74, 222, 128, 0.14);
+@mat-btn-primary-bg:      @accent;
+@mat-btn-primary-text:    @bg-page;

@@ -1,0 +1,13 @@
+{
+  "name": "badminton-tracker-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node.js backend for Badminton Tracker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node scripts/start-all.js",
+    "dev:api": "node server.js",
+    "dev:web": "npm --prefix badminton-angular start"
+  }
+}

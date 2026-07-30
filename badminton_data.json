@@ -1,0 +1,783 @@
+{
+  "members": [
+    "Kranthi",
+    "Santosh",
+    "Sachin",
+    "Rahul Chidurala",
+    "Sri Ramana",
+    "Basava",
+    "Harsha",
+    "Utkarsh",
+    "Varshitha",
+    "Venkatesh",
+    "Suraj Dravid",
+    "Purnendhu",
+    "Niharika",
+    "Krishna",
+    "Ramakrishna Mogilipuri",
+    "Ashutosh",
+    "Rahul chavan",
+    "Mahesh",
+    "Sandeep",
+    "Siva",
+    "Sai Suraj",
+    "Hemanth",
+    "Sudheer",
+    "Ramakrishna",
+    "Pawan"
+  ],
+  "sessions": [
+    {
+      "id": 1,
+      "date": "8th April",
+      "cost": 930,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 930
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 2,
+      "date": "15th April",
+      "cost": 700,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 700
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 3,
+      "date": "29th April",
+      "cost": 614,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 614
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 4,
+      "date": "6th May",
+      "cost": 690,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 690
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 5,
+      "date": "9th May",
+      "cost": 400,
+      "payments": [
+        {
+          "player": "Sri Ramana",
+          "amount": 400
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 6,
+      "date": "13th May",
+      "cost": 1360,
+      "payments": [
+        {
+          "player": "Sri Ramana",
+          "amount": 670
+        },
+        {
+          "player": "Kranthi",
+          "amount": 690
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 7,
+      "date": "18th May",
+      "cost": 1898,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1898
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 8,
+      "date": "20th May",
+      "cost": 1647,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1647
+        }
+      ],
+      "notes": "Match point Pride court"
+    },
+    {
+      "id": 9,
+      "date": "Shuttles M-350",
+      "cost": 1155,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1155
+        }
+      ],
+      "notes": "Only for UI team"
+    },
+    {
+      "id": 10,
+      "date": "27th May",
+      "cost": 1422,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1422
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 11,
+      "date": "3rd June",
+      "cost": 1659,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1422
+        },
+        {
+          "player": "Sri Ramana",
+          "amount": 237
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 12,
+      "date": "6th June",
+      "cost": 1200,
+      "payments": [
+        {
+          "player": "Basava",
+          "amount": 1200
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 13,
+      "date": "10th June",
+      "cost": 1701,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1701
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 14,
+      "date": "14th June",
+      "cost": 1300,
+      "payments": [
+        {
+          "player": "Sachin",
+          "amount": 1300
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 15,
+      "date": "18th June",
+      "cost": 1671,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1671
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 16,
+      "date": "24th June",
+      "cost": 1938,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1938
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 17,
+      "date": "1st July",
+      "cost": 1318,
+      "payments": [
+        {
+          "player": "Venkatesh",
+          "amount": 1318
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 18,
+      "date": "July 8th",
+      "cost": 1700,
+      "payments": [
+        {
+          "player": "Suraj Dravid",
+          "amount": 1700
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 19,
+      "date": "22nd July",
+      "cost": 1300,
+      "payments": [
+        {
+          "player": "Suraj Dravid",
+          "amount": 1300
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": 20,
+      "date": "22nd July",
+      "cost": 1450,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1450
+        }
+      ],
+      "notes": "food"
+    },
+    {
+      "id": 22,
+      "date": "29th July",
+      "cost": 1960,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 1960
+        }
+      ],
+      "notes": "Badminton"
+    },
+    {
+      "id": 23,
+      "date": "29th July",
+      "cost": 1209,
+      "payments": [
+        {
+          "player": "Kranthi",
+          "amount": 500
+        },
+        {
+          "player": "Suraj Dravid",
+          "amount": 209
+        },
+        {
+          "player": "Sri Ramana",
+          "amount": 500
+        }
+      ],
+      "notes": ""
+    }
+  ],
+  "attendance": {
+    "1": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Basava",
+      "Utkarsh",
+      "Harsha"
+    ],
+    "2": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Basava",
+      "Harsha",
+      "Utkarsh"
+    ],
+    "3": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Basava",
+      "Harsha",
+      "Venkatesh"
+    ],
+    "4": [
+      "Kranthi",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Santosh",
+      "Varshitha",
+      "Basava"
+    ],
+    "5": [
+      "Kranthi",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Suraj Dravid",
+      "Purnendhu",
+      "Varshitha",
+      "Venkatesh",
+      "Basava"
+    ],
+    "6": [
+      "Kranthi",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Venkatesh",
+      "Suraj Dravid",
+      "Purnendhu",
+      "Santosh",
+      "Varshitha",
+      "Basava"
+    ],
+    "7": [
+      "Kranthi",
+      "Sachin",
+      "Sri Ramana",
+      "Venkatesh",
+      "Suraj Dravid",
+      "Niharika",
+      "Krishna",
+      "Santosh",
+      "Basava"
+    ],
+    "8": [
+      "Kranthi",
+      "Sachin",
+      "Sri Ramana",
+      "Basava",
+      "Varshitha",
+      "Venkatesh",
+      "Suraj Dravid",
+      "Niharika"
+    ],
+    "9": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Basava",
+      "Suraj Dravid",
+      "Varshitha"
+    ],
+    "10": [
+      "Kranthi",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Basava",
+      "Varshitha",
+      "Ramakrishna Mogilipuri",
+      "Ashutosh"
+    ],
+    "11": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Basava",
+      "Varshitha",
+      "Venkatesh",
+      "Suraj Dravid",
+      "Mahesh",
+      "Rahul chavan"
+    ],
+    "12": [
+      "Kranthi",
+      "Santosh",
+      "Basava",
+      "Varshitha",
+      "Venkatesh",
+      "Suraj Dravid",
+      "Mahesh"
+    ],
+    "13": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Rahul Chidurala",
+      "Basava",
+      "Venkatesh",
+      "Suraj Dravid",
+      "Mahesh",
+      "Siva",
+      "Sai Suraj",
+      "Sandeep"
+    ],
+    "14": [
+      "Kranthi",
+      "Sachin",
+      "Basava",
+      "Harsha",
+      "Mahesh",
+      "Sandeep"
+    ],
+    "15": [
+      "Kranthi",
+      "Basava",
+      "Sachin",
+      "Niharika",
+      "Mahesh",
+      "Sandeep",
+      "Hemanth",
+      "Sudheer",
+      "Suraj Dravid",
+      "Siva",
+      "Sai Suraj",
+      "Santosh"
+    ],
+    "16": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Ashutosh",
+      "Mahesh",
+      "Sandeep",
+      "Sudheer"
+    ],
+    "17": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Venkatesh",
+      "Suraj Dravid",
+      "Ashutosh",
+      "Varshitha",
+      "Mahesh",
+      "Basava",
+      "Sudheer"
+    ],
+    "18": [
+      "Kranthi",
+      "Santosh",
+      "Sachin",
+      "Suraj Dravid",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Venkatesh",
+      "Sandeep",
+      "Mahesh",
+      "Sudheer",
+      "Basava"
+    ],
+    "19": [
+      "Kranthi",
+      "Santosh",
+      "Rahul Chidurala",
+      "Sri Ramana",
+      "Basava",
+      "Venkatesh",
+      "Suraj Dravid",
+      "Niharika",
+      "Rahul chavan",
+      "Mahesh",
+      "Sandeep",
+      "Sudheer",
+      "Siva"
+    ],
+    "20": [
+      "Rahul Chidurala",
+      "Rahul chavan",
+      "Niharika",
+      "Kranthi",
+      "Venkatesh",
+      "Mahesh",
+      "Santosh",
+      "Sachin",
+      "Sri Ramana"
+    ],
+    "22": [
+      "Kranthi",
+      "Santosh",
+      "Sri Ramana",
+      "Rahul Chidurala",
+      "Suraj Dravid",
+      "Sai Suraj",
+      "Venkatesh",
+      "Krishna",
+      "Sudheer",
+      "Mahesh",
+      "Sandeep",
+      "Hemanth",
+      "Rahul chavan",
+      "Pawan",
+      "Ramakrishna",
+      "Ashutosh"
+    ],
+    "23": [
+      "Kranthi",
+      "Krishna",
+      "Venkatesh",
+      "Rahul chavan",
+      "Rahul Chidurala",
+      "Ashutosh",
+      "Suraj Dravid",
+      "Mahesh",
+      "Sri Ramana"
+    ]
+  },
+  "nextId": 24,
+  "duesPayments": [
+    {
+      "id": 1779190129789,
+      "from": "Varshitha",
+      "to": "Kranthi",
+      "amount": 279,
+      "date": "2026-05-19",
+      "note": ""
+    },
+    {
+      "id": 1779203908910,
+      "from": "Venkatesh",
+      "to": "Kranthi",
+      "amount": 468,
+      "date": "2026-05-19",
+      "note": ""
+    },
+    {
+      "id": 1779203949502,
+      "from": "Niharika",
+      "to": "Kranthi",
+      "amount": 237,
+      "date": "2026-05-19",
+      "note": ""
+    },
+    {
+      "id": 1779205197416,
+      "from": "Suraj Dravid",
+      "to": "Kranthi",
+      "amount": 391,
+      "date": "2026-05-19",
+      "note": ""
+    },
+    {
+      "id": 1780033008689,
+      "from": "Basava",
+      "to": "Kranthi",
+      "amount": 780,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033025556,
+      "from": "Krishna",
+      "to": "Kranthi",
+      "amount": 211,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033384910,
+      "from": "Suraj Dravid",
+      "to": "Kranthi",
+      "amount": 351,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033470857,
+      "from": "Niharika",
+      "to": "Kranthi",
+      "amount": 180,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033560510,
+      "from": "Ashutosh",
+      "to": "Kranthi",
+      "amount": 178,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033668522,
+      "from": "Purnendhu",
+      "to": "Kranthi",
+      "amount": 180,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033853604,
+      "from": "Basava",
+      "to": "Kranthi",
+      "amount": 535,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033866560,
+      "from": "Santosh",
+      "to": "Kranthi",
+      "amount": 887,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033889134,
+      "from": "Sri Ramana",
+      "to": "Kranthi",
+      "amount": 245,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780033968156,
+      "from": "Varshitha",
+      "to": "Kranthi",
+      "amount": 528,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780034513408,
+      "from": "Harsha",
+      "to": "Kranthi",
+      "amount": 164,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780037389976,
+      "from": "Venkatesh",
+      "to": "Kranthi",
+      "amount": 206,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1780042799400,
+      "from": "Rahul Chidurala",
+      "to": "Kranthi",
+      "amount": 898,
+      "date": "2026-05-29",
+      "note": ""
+    },
+    {
+      "id": 1783133391143,
+      "from": "Mahesh",
+      "to": "Kranthi",
+      "amount": 1180,
+      "date": "2026-07-04",
+      "note": "Phonepe"
+    },
+    {
+      "id": 1783134755939,
+      "from": "Sachin",
+      "to": "Kranthi",
+      "amount": 1024,
+      "date": "2026-07-04",
+      "note": "Phonepe"
+    },
+    {
+      "id": 1783134767360,
+      "from": "Sri Ramana",
+      "to": "Kranthi",
+      "amount": 129,
+      "date": "2026-07-04",
+      "note": "Phonepe"
+    },
+    {
+      "id": 1783134806804,
+      "from": "Rahul chavan",
+      "to": "Kranthi",
+      "amount": 151,
+      "date": "2026-07-04",
+      "note": "Paytm pay"
+    },
+    {
+      "id": 1783135551920,
+      "from": "Sandeep",
+      "to": "Kranthi",
+      "amount": 726,
+      "date": "2026-07-04",
+      "note": ""
+    },
+    {
+      "id": 1783137766341,
+      "from": "Ashutosh",
+      "to": "Kranthi",
+      "amount": 347,
+      "date": "2026-07-04",
+      "note": ""
+    },
+    {
+      "id": 1783145273185,
+      "from": "Varshitha",
+      "to": "Kranthi",
+      "amount": 454,
+      "date": "2026-07-04",
+      "note": ""
+    },
+    {
+      "id": 1783145311273,
+      "from": "Niharika",
+      "to": "Kranthi",
+      "amount": 139,
+      "date": "2026-07-04",
+      "note": ""
+    },
+    {
+      "id": 1783145329598,
+      "from": "Siva",
+      "to": "Kranthi",
+      "amount": 294,
+      "date": "2026-07-04",
+      "note": ""
+    },
+    {
+      "id": 1783145350673,
+      "from": "Sai Suraj",
+      "to": "Kranthi",
+      "amount": 294,
+      "date": "2026-07-04",
+      "note": ""
+    }
+  ]
+}

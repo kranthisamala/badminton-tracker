@@ -1,0 +1,62 @@
+<section class="state-card">
+  <h2 class="section-title">Record Dues Payment</h2>
+
+  <div class="tab-form-grid">
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Paid By</mat-label>
+      <mat-select [(ngModel)]="store.duesFrom">
+        <mat-option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Paid To</mat-label>
+      <mat-select [(ngModel)]="store.duesTo">
+        <mat-option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Amount (Rs)</mat-label>
+      <input matInput type="number" min="0" [(ngModel)]="store.duesAmount" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Date</mat-label>
+      <input matInput type="date" [(ngModel)]="store.duesDate" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Note (optional)</mat-label>
+      <input matInput type="text" [(ngModel)]="store.duesNote" placeholder="e.g. UPI transfer" />
+    </mat-form-field>
+  </div>
+
+  <div class="actions-row">
+    <button mat-flat-button color="primary" (click)="store.saveDuesPayment()">
+      {{ store.duesEditId !== null ? 'Save Changes' : 'Record Payment' }}
+    </button>
+    <button mat-stroked-button *ngIf="store.duesEditId !== null" (click)="store.cancelDuesEdit()">Cancel Edit</button>
+  </div>
+</section>
+
+<section class="state-card">
+  <h2 class="section-title">Payment Records ({{ store.duesRecords.length }})</h2>
+  <div class="session-list" *ngIf="store.duesRecords.length; else noDues">
+    <article class="session-card" *ngFor="let payment of store.duesRecords">
+      <div class="session-head">
+        <div>
+          <h3>{{ payment.from }} → {{ payment.to }}</h3>
+          <p *ngIf="payment.note">{{ payment.note }}</p>
+        </div>
+        <div class="session-cost">
+          <strong>Rs {{ payment.amount | number:'1.0-0' }}</strong>
+          <span>{{ store.formatDate(payment.date) }}</span>
+          <button mat-stroked-button (click)="store.editDuesPayment(payment)">Edit</button>
+          <button mat-stroked-button color="warn" (click)="store.deleteDuesPayment(payment.id)">Delete</button>
+        </div>
+      </div>
+    </article>
+  </div>
+  <ng-template #noDues><p>No dues payments recorded yet.</p></ng-template>
+</section>
