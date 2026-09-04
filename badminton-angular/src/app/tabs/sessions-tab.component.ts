@@ -81,3 +81,5 @@ export class SessionsTabComponent {
     const suffixes = ['th', 'st', 'nd', 'rd'];
     const suffix = suffixes[(v - 20) % 10] ?? suffixes[v] ?? suffixes[0];
     return `${day}${suffix} ${month}`;
+  }
+}

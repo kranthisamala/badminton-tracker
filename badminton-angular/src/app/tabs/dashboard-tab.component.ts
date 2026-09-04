@@ -76,6 +76,44 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
     setTimeout(() => this.resizeAllCharts(), 50);
   }
 
+  exportChart(key: DashboardChartKey): void {
+    const canvas = this.getCanvasByKey(key);
+    if (!canvas) return;
+
+    const tmp = document.createElement('canvas');
+    tmp.width = canvas.width;
+    tmp.height = canvas.height;
+    const ctx = tmp.getContext('2d');
+    if (!ctx) return;
+
+    ctx.fillStyle = '#161a18';
+    ctx.fillRect(0, 0, tmp.width, tmp.height);
+    ctx.drawImage(canvas, 0, 0);
+
+    const titles: Record<DashboardChartKey, string> = {
+      spendTrend: 'spend-trend',
+      attendance: 'attendance-by-session',
+      attendanceRate: 'member-attendance-rate',
+      payOwe: 'pay-vs-owe',
+      balance: 'net-balance'
+    };
+
+    const link = document.createElement('a');
+    link.download = `${titles[key]}.png`;
+    link.href = tmp.toDataURL('image/png');
+    link.click();
+  }
+
+  private getCanvasByKey(key: DashboardChartKey): HTMLCanvasElement | undefined {
+    switch (key) {
+      case 'spendTrend':     return this.spendTrendCanvas?.nativeElement;
+      case 'attendance':     return this.attendanceCanvas?.nativeElement;
+      case 'attendanceRate': return this.attendanceRateCanvas?.nativeElement;
+      case 'payOwe':         return this.payOweCanvas?.nativeElement;
+      case 'balance':        return this.balanceCanvas?.nativeElement;
+    }
+  }
+
   private resizeAllCharts(): void {
     this.spendChart?.resize();
     this.attendanceChart?.resize();

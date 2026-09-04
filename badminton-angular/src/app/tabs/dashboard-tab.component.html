@@ -10,8 +10,8 @@
       <h3>Spend Trend by Session</h3>
       <div class="chart-card-actions">
         <span class="chart-drilldown-hint">Click point → Sessions</span>
+        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('spendTrend')" aria-label="Export Spend Trend chart">⬇</button>
         <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'spendTrend' ? collapseCard() : expandCard('spendTrend')" [attr.aria-label]="expandedCard === 'spendTrend' ? 'Collapse chart' : 'Expand chart'">
-          {{ expandedCard === 'spendTrend' ? '⛶' : '⛶' }}
           {{ expandedCard === 'spendTrend' ? 'Collapse' : 'Expand' }}
         </button>
       </div>
@@ -26,6 +26,7 @@
       <h3>Attendance by Session</h3>
       <div class="chart-card-actions">
         <span class="chart-drilldown-hint">Click bar → Attendance</span>
+        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('attendance')" aria-label="Export Attendance chart">⬇</button>
         <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'attendance' ? collapseCard() : expandCard('attendance')">
           {{ expandedCard === 'attendance' ? 'Collapse' : 'Expand' }}
         </button>
@@ -41,6 +42,7 @@
       <h3>Member Attendance Rate</h3>
       <div class="chart-card-actions">
         <span class="chart-drilldown-hint">Click member → View report</span>
+        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('attendanceRate')" aria-label="Export Attendance Rate chart">⬇</button>
         <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'attendanceRate' ? collapseCard() : expandCard('attendanceRate')">
           {{ expandedCard === 'attendanceRate' ? 'Collapse' : 'Expand' }}
         </button>
@@ -56,6 +58,7 @@
       <h3>Pay vs Owe by Member</h3>
       <div class="chart-card-actions">
         <span class="chart-drilldown-hint">Click member → View report</span>
+        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('payOwe')" aria-label="Export Pay vs Owe chart">⬇</button>
         <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'payOwe' ? collapseCard() : expandCard('payOwe')">
           {{ expandedCard === 'payOwe' ? 'Collapse' : 'Expand' }}
         </button>
@@ -71,6 +74,7 @@
       <h3>Net Balance by Member</h3>
       <div class="chart-card-actions">
         <span class="chart-drilldown-hint">Click member → View report</span>
+        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('balance')" aria-label="Export Net Balance chart">⬇</button>
         <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'balance' ? collapseCard() : expandCard('balance')">
           {{ expandedCard === 'balance' ? 'Collapse' : 'Expand' }}
         </button>
