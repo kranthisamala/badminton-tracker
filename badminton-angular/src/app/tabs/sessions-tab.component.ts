@@ -33,7 +33,7 @@ export class SessionsTabComponent {
   editingSessionId: number | null = null;
   editDate = '';
   editNotes = '';
-  editPayments: { player: string; amount: number }[] = [];
+  editPayments: { memberId: number; amount: number }[] = [];
 
   constructor(public readonly store: TrackerStoreService) {}
 
@@ -53,7 +53,7 @@ export class SessionsTabComponent {
     this.editingSessionId = session.id;
     this.editDate = session.date;
     this.editNotes = session.notes || '';
-    this.editPayments = session.payments.map(p => ({ player: p.player, amount: p.amount }));
+    this.editPayments = session.payments.map(p => ({ memberId: p.memberId, amount: p.amount }));
   }
 
   cancelEdit(): void {
@@ -61,7 +61,7 @@ export class SessionsTabComponent {
   }
 
   addEditPaymentRow(): void {
-    this.editPayments.push({ player: this.store.data?.members[0] || '', amount: 0 });
+    this.editPayments.push({ memberId: this.store.data?.members[0]?.id || 0, amount: 0 });
   }
 
   removeEditPaymentRow(index: number): void {

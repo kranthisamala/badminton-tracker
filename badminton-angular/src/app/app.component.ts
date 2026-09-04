@@ -43,8 +43,8 @@ export class AppComponent implements OnInit {
 
   onDashboardDrilldown(event: DashboardDrilldown): void {
     this.selectTab(event.tab as TabName);
-    if (event.member) {
-      this.store.pendingDrilldownMember = event.member;
+    if (event.memberId) {
+      this.store.pendingDrilldownMemberId = event.memberId;
     }
   }
 

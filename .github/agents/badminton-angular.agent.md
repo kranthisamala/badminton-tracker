@@ -49,17 +49,19 @@ badminton_tracker/badminton/
 ## Data Model (`models.ts`)
 
 ```typescript
-interface Payment       { player: string; amount: number; }
+interface Member        { id: number; name: string; }
+interface Payment       { memberId: number; amount: number; }
 interface Session       { id: number; date: string; cost: number; payments: Payment[]; notes: string; }
-interface DuesPayment   { id: number; from: string; to: string; amount: number; date: string; note: string; }
-interface TrackerData   { members: string[]; sessions: Session[]; attendance: Record<string, string[]>; duesPayments?: DuesPayment[]; nextId: number; }
-interface MemberSummary { name: string; owed: number; paid: number; duesPaid: number; balance: number; }
-interface MemberReport  { name: string; sessionsAttended: number; totalSessions: number; attendanceRate: number; sessionPaid: number; totalPaid: number; totalOwed: number; duesPaid: number; duesReceived: number; netBalance: number; attendedSessions: MemberAttendanceRecord[]; payments: MemberPaymentRecord[]; }
+interface DuesPayment   { id: number; fromId: number; toId: number; amount: number; date: string; note: string; }
+interface TrackerData   { members: Member[]; sessions: Session[]; attendance: Record<string, number[]>; duesPayments?: DuesPayment[]; nextId: number; nextMemberId: number; }
+interface MemberSummary { id: number; name: string; owed: number; paid: number; duesPaid: number; balance: number; }
+interface MemberReport  { id: number; name: string; sessionsAttended: number; totalSessions: number; attendanceRate: number; sessionPaid: number; totalPaid: number; totalOwed: number; duesPaid: number; duesReceived: number; netBalance: number; attendedSessions: MemberAttendanceRecord[]; payments: MemberPaymentRecord[]; }
 ```
 
-- `attendance` key = `String(session.id)`, value = array of member name strings
+- Members are identified by numeric `id`, not by name — `sessions[].payments[].memberId`, `attendance` values, and `duesPayments[].fromId/toId` all reference that id. Use `store.memberName(id)` / `store.memberById(id)` to resolve display text.
+- `attendance` key = `String(session.id)`, value = array of member ids
 - Session `date` is a human-readable string like `"17th July"` (set by datepicker formatter)
-- `nextId` is the autoincrement counter for new sessions
+- `nextId` is the autoincrement counter for new sessions; `nextMemberId` is the autoincrement counter for new members
 
 ---
 
@@ -84,9 +86,9 @@ type TabName = 'summary' | 'dashboard' | 'quick-attendance' | 'attendance' | 'se
 `AppComponent.selectTab(tab)` switches the active tab and clears messages.
 
 To **navigate programmatically from a child tab** (e.g. dashboard drilldown):
-1. Child emits `@Output() drilldown = new EventEmitter<{tab: string; member?: string}>()` 
-2. `AppComponent` handles it with `onDashboardDrilldown(event)`, calls `selectTab()`, optionally sets `store.pendingDrilldownMember`
-3. Target tab reads `store.pendingDrilldownMember` in `ngOnInit()` and clears it after use
+1. Child emits `@Output() drilldown = new EventEmitter<{tab: string; memberId?: number}>()` 
+2. `AppComponent` handles it with `onDashboardDrilldown(event)`, calls `selectTab()`, optionally sets `store.pendingDrilldownMemberId`
+3. Target tab reads `store.pendingDrilldownMemberId` in `ngOnInit()` and clears it after use
 
 ---
 
@@ -107,16 +109,16 @@ newSessionNotes: string
 newSessionPayments: Payment[]
 
 // Edit state
-pendingDrilldownMember: string | null   // set before navigating to members tab
+pendingDrilldownMemberId: number | null   // set before navigating to members tab
 
 // Dues form state
 duesEditId: number | null
-duesFrom: string; duesTo: string; duesAmount: number; duesDate: string; duesNote: string
+duesFrom: number; duesTo: number; duesAmount: number; duesDate: string; duesNote: string
 
 // Quick attendance
 quickAttendanceSessionId: number | null
 quickAttendanceQuery: string
-quickAttendanceSelectedMembers: string[]
+quickAttendanceSelectedMembers: number[]
 ```
 
 ### Key methods
@@ -128,11 +130,13 @@ deleteSession(id)                          // confirm then delete
 saveDuesPayment()                          // add or update (duesEditId decides)
 editDuesPayment(payment)                   // populate dues form for edit
 deleteDuesPayment(id)
-addMember(); removeMember(name); renameMember(oldName)
-toggleAttendance(sessionId, member)
-getMemberReport(member): MemberReport      // full computed report
+addMember(); removeMember(memberId); renameMember(memberId)
+toggleAttendance(sessionId, memberId)
+getMemberReport(memberId): MemberReport    // full computed report
+memberName(memberId): string               // resolve id → display name
+memberById(memberId): Member | undefined
 formatDate(dateText): string               // yyyy-mm-dd → "17 Jul 2025"
-prepareQuickDuesFor(member)
+prepareQuickDuesFor(memberId)
 ```
 
 ### Mutating pattern
@@ -238,7 +242,7 @@ Import `MemberReportModalComponent` in the component's `imports` array.
 - Canvas must be inside a `.chart-canvas-wrap` div (flex:1 fill) for proper sizing
 - Standard color palette: `#4ade80` (green/positive), `#f87171` (red/negative), `#60a5fa` (blue/rate), `#f59e0b` (amber/owed), `#22c55e` (attendance)
 - Axis tick color: `#9bb0a2`; grid color: `#2a332e`; legend label color: `#c8d8ce`
-- Click handlers resolve member name via stored label arrays (e.g. `balanceMemberOrder[elements[0].index]`)
+- Click handlers resolve member id via stored order arrays (e.g. `balanceMemberOrder[elements[0].index]`), then `store.memberName(id)` for display
 - Fullscreen expand: `.chart-card--expanded` class → `position:fixed; inset:0; z-index:900; display:flex; flex-direction:column`; call `chart.resize()` after 50ms
 
 ---
@@ -264,7 +268,7 @@ Build warning to ignore: initial bundle exceeds 800 KB (Chart.js is large — ex
 
 ## Constraints
 
-- **Never change `badminton_data.json` schema** — data contract is fixed (`members`, `sessions`, `attendance`, `duesPayments?`, `nextId`)
+- **Never change `badminton_data.json` schema** without a migration + validation script (see `scripts/migrate-to-id-schema.js` and `scripts/validate-migration.js` for the pattern) — current contract is id-based: `members: {id,name}[]`, `sessions`, `attendance: Record<string, number[]>`, `duesPayments?`, `nextId`, `nextMemberId`
 - **Never use Angular Router** — tab switching only via `AppComponent.selectTab()`
 - **Never define shared layout classes in component files** — put new shared styles in `styles.less`
 - **All state mutations go through `TrackerStoreService`** — never call `trackerDataService.saveData()` directly

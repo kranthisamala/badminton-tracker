@@ -1,5 +1,10 @@
+export interface Member {
+  id: number;
+  name: string;
+}
+
 export interface Payment {
-  player: string;
+  memberId: number;
   amount: number;
 }
 
@@ -13,22 +18,24 @@ export interface Session {
 
 export interface DuesPayment {
   id: number;
-  from: string;
-  to: string;
+  fromId: number;
+  toId: number;
   amount: number;
   date: string;
   note: string;
 }
 
 export interface TrackerData {
-  members: string[];
+  members: Member[];
   sessions: Session[];
-  attendance: Record<string, string[]>;
+  attendance: Record<string, number[]>;
   duesPayments?: DuesPayment[];
   nextId: number;
+  nextMemberId: number;
 }
 
 export interface MemberSummary {
+  id: number;
   name: string;
   owed: number;
   paid: number;
@@ -52,6 +59,7 @@ export interface MemberPaymentRecord {
 }
 
 export interface MemberReport {
+  id: number;
   name: string;
   sessionsAttended: number;
   totalSessions: number;

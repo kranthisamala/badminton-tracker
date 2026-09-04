@@ -50,9 +50,9 @@ export class QuickAttendanceTabComponent implements AfterViewInit {
   }
 
   onOptionSelected(event: MatAutocompleteSelectedEvent): void {
-    const member: string = event.option.value;
+    const memberName: string = event.option.value;
     // Immediately add to session attendance (one step)
-    this.store.addQuickAttendanceMember(member);
+    this.store.addQuickAttendanceMember(memberName);
     this.store.quickAttendanceQuery = '';
     if (this.memberInputEl) {
       this.memberInputEl.nativeElement.value = '';
@@ -66,7 +66,7 @@ export class QuickAttendanceTabComponent implements AfterViewInit {
     });
   }
 
-  removeFromSession(member: string): void {
-    this.store.removeQuickAttendanceMember(member);
+  removeFromSession(memberId: number): void {
+    this.store.removeQuickAttendanceMember(memberId);
   }
 }

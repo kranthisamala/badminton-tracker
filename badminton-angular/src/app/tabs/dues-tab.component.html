@@ -5,14 +5,14 @@
     <mat-form-field appearance="outline" class="tab-field">
       <mat-label>Paid By</mat-label>
       <mat-select [(ngModel)]="store.duesFrom">
-        <mat-option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</mat-option>
+        <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="tab-field">
       <mat-label>Paid To</mat-label>
       <mat-select [(ngModel)]="store.duesTo">
-        <mat-option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</mat-option>
+        <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -46,7 +46,7 @@
     <article class="session-card" *ngFor="let payment of store.duesRecords">
       <div class="session-head">
         <div>
-          <h3>{{ payment.from }} → {{ payment.to }}</h3>
+          <h3>{{ store.memberName(payment.fromId) }} → {{ store.memberName(payment.toId) }}</h3>
           <p *ngIf="payment.note">{{ payment.note }}</p>
         </div>
         <div class="session-cost">

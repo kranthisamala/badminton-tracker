@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DuesPayment, MemberReport, MemberSummary, Payment, Session, TrackerData } from '../models';
+import { DuesPayment, Member, MemberReport, MemberSummary, Payment, Session, TrackerData } from '../models';
 import { TrackerDataService } from '../tracker-data.service';
 
 @Injectable({ providedIn: 'root' })
@@ -13,22 +13,22 @@ export class TrackerStoreService {
 
   newSessionDate = '';
   newSessionNotes = '';
-  newSessionPayments: Payment[] = [{ player: '', amount: 0 }];
+  newSessionPayments: Payment[] = [{ memberId: 0, amount: 0 }];
 
   quickAttendanceSessionId: number | null = null;
   quickAttendanceQuery = '';
-  quickAttendanceSelectedMembers: string[] = [];
+  quickAttendanceSelectedMembers: number[] = [];
 
   duesEditId: number | null = null;
-  duesFrom = '';
-  duesTo = '';
+  duesFrom = 0;
+  duesTo = 0;
   duesAmount = 0;
   duesDate = '';
   duesNote = '';
 
   newMemberName = '';
 
-  pendingDrilldownMember: string | null = null;
+  pendingDrilldownMemberId: number | null = null;
 
   constructor(private readonly trackerDataService: TrackerDataService) {}
 
@@ -52,6 +52,14 @@ export class TrackerStoreService {
     this.successMessage = '';
   }
 
+  memberById(id: number): Member | undefined {
+    return this.data?.members.find(member => member.id === id);
+  }
+
+  memberName(id: number): string {
+    return this.memberById(id)?.name || '';
+  }
+
   get sessionCost(): number {
     return this.newSessionPayments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
   }
@@ -72,31 +80,31 @@ export class TrackerStoreService {
     return found || this.data.sessions[this.data.sessions.length - 1];
   }
 
-  get quickSessionAttendees(): string[] {
+  get quickSessionAttendees(): number[] {
     const session = this.quickSession;
     if (!session || !this.data) return [];
     return (this.data.attendance[String(session.id)] || []).slice();
   }
 
-  get quickAttendanceAvailableMembers(): string[] {
+  get quickAttendanceAvailableMembers(): Member[] {
     if (!this.data) return [];
     const selected = new Set(this.quickSessionAttendees);
-    return this.data.members.filter(member => !selected.has(member));
+    return this.data.members.filter(member => !selected.has(member.id));
   }
 
-  get quickAttendanceDropdownMembers(): string[] {
+  get quickAttendanceDropdownMembers(): Member[] {
     const query = this.quickAttendanceQuery.trim().toLowerCase();
     return this.quickAttendanceAvailableMembers.filter(member =>
-      !query || member.toLowerCase().includes(query)
+      !query || member.name.toLowerCase().includes(query)
     );
   }
 
-  get filteredQuickSuggestions(): string[] {
+  get filteredQuickSuggestions(): Member[] {
     return this.quickAttendanceDropdownMembers.slice(0, 12);
   }
 
   addPaymentRow(): void {
-    this.newSessionPayments.push({ player: this.data?.members[0] || '', amount: 0 });
+    this.newSessionPayments.push({ memberId: this.data?.members[0]?.id || 0, amount: 0 });
   }
 
   removePaymentRow(index: number): void {
@@ -110,8 +118,8 @@ export class TrackerStoreService {
     const date = this.newSessionDate.trim();
     const notes = this.newSessionNotes.trim();
     const payments = this.newSessionPayments
-      .map(payment => ({ player: payment.player, amount: Number(payment.amount) || 0 }))
-      .filter(payment => payment.player && payment.amount > 0);
+      .map(payment => ({ memberId: Number(payment.memberId), amount: Number(payment.amount) || 0 }))
+      .filter(payment => payment.memberId && payment.amount > 0);
 
     const cost = payments.reduce((sum, payment) => sum + payment.amount, 0);
 
@@ -153,8 +161,8 @@ export class TrackerStoreService {
     if (!session) { this.errorMessage = 'Session not found.'; return; }
 
     const valid = payments
-      .map(p => ({ player: p.player, amount: Number(p.amount) || 0 }))
-      .filter(p => p.player && p.amount > 0);
+      .map(p => ({ memberId: Number(p.memberId), amount: Number(p.amount) || 0 }))
+      .filter(p => p.memberId && p.amount > 0);
     const cost = valid.reduce((sum, p) => sum + p.amount, 0);
 
     if (!date.trim() || cost <= 0) {
@@ -177,18 +185,18 @@ export class TrackerStoreService {
     this.quickAttendanceQuery = '';
   }
 
-  isQuickAttendanceMemberPicked(member: string): boolean {
-    return this.quickAttendanceSelectedMembers.includes(member);
+  isQuickAttendanceMemberPicked(memberId: number): boolean {
+    return this.quickAttendanceSelectedMembers.includes(memberId);
   }
 
-  toggleQuickAttendanceMemberSelection(member: string, checked: boolean): void {
+  toggleQuickAttendanceMemberSelection(memberId: number, checked: boolean): void {
     if (checked) {
-      if (!this.quickAttendanceSelectedMembers.includes(member)) {
-        this.quickAttendanceSelectedMembers = [...this.quickAttendanceSelectedMembers, member];
+      if (!this.quickAttendanceSelectedMembers.includes(memberId)) {
+        this.quickAttendanceSelectedMembers = [...this.quickAttendanceSelectedMembers, memberId];
       }
       return;
     }
-    this.quickAttendanceSelectedMembers = this.quickAttendanceSelectedMembers.filter(name => name !== member);
+    this.quickAttendanceSelectedMembers = this.quickAttendanceSelectedMembers.filter(id => id !== memberId);
   }
 
   clearQuickAttendanceSelection(): void {
@@ -208,11 +216,11 @@ export class TrackerStoreService {
     if (!this.data.attendance[key]) this.data.attendance[key] = [];
     const attendees = this.data.attendance[key];
 
-    const added: string[] = [];
-    picked.forEach(member => {
-      if (!attendees.includes(member)) {
-        attendees.push(member);
-        added.push(member);
+    const added: number[] = [];
+    picked.forEach(memberId => {
+      if (!attendees.includes(memberId)) {
+        attendees.push(memberId);
+        added.push(memberId);
       }
     });
 
@@ -236,7 +244,7 @@ export class TrackerStoreService {
       return false;
     }
 
-    const member = this.data.members.find(m => m.toLowerCase() === typed.toLowerCase());
+    const member = this.data.members.find(m => m.name.toLowerCase() === typed.toLowerCase());
     if (!member) {
       this.errorMessage = 'Member not found.';
       return false;
@@ -244,48 +252,48 @@ export class TrackerStoreService {
 
     const key = String(this.quickSession.id);
     if (!this.data.attendance[key]) this.data.attendance[key] = [];
-    if (this.data.attendance[key].includes(member)) {
-      this.errorMessage = member + ' is already added.';
+    if (this.data.attendance[key].includes(member.id)) {
+      this.errorMessage = member.name + ' is already added.';
       return false;
     }
 
-    this.data.attendance[key].push(member);
+    this.data.attendance[key].push(member.id);
     this.recomputeDerivedState();
     this.quickAttendanceQuery = '';
-    this.persistData(member + ' added to attendance.');
+    this.persistData(member.name + ' added to attendance.');
     return true;
   }
 
-  removeQuickAttendanceMember(member: string): void {
+  removeQuickAttendanceMember(memberId: number): void {
     if (!this.data || !this.quickSession) return;
 
     const key = String(this.quickSession.id);
     const arr = this.data.attendance[key] || [];
-    this.data.attendance[key] = arr.filter(name => name !== member);
+    this.data.attendance[key] = arr.filter(id => id !== memberId);
 
     this.recomputeDerivedState();
-    this.persistData(member + ' removed from attendance.');
+    this.persistData(this.memberName(memberId) + ' removed from attendance.');
   }
 
-  toggleAttendance(sessionId: number, member: string): void {
+  toggleAttendance(sessionId: number, memberId: number): void {
     if (!this.data) return;
 
     const key = String(sessionId);
     if (!this.data.attendance[key]) this.data.attendance[key] = [];
 
     const arr = this.data.attendance[key];
-    const idx = arr.indexOf(member);
-    if (idx < 0) arr.push(member);
+    const idx = arr.indexOf(memberId);
+    if (idx < 0) arr.push(memberId);
     else arr.splice(idx, 1);
 
     this.recomputeDerivedState();
     this.persistData('Attendance updated.');
   }
 
-  isPresent(sessionId: number, member: string): boolean {
+  isPresent(sessionId: number, memberId: number): boolean {
     if (!this.data) return false;
     const arr = this.data.attendance[String(sessionId)] || [];
-    return arr.includes(member);
+    return arr.includes(memberId);
   }
 
   attendeesCount(sessionId: number): number {
@@ -323,8 +331,8 @@ export class TrackerStoreService {
       if (index >= 0) {
         this.data.duesPayments[index] = {
           id: this.duesEditId,
-          from: this.duesFrom,
-          to: this.duesTo,
+          fromId: this.duesFrom,
+          toId: this.duesTo,
           amount,
           date: this.duesDate,
           note: this.duesNote.trim()
@@ -338,8 +346,8 @@ export class TrackerStoreService {
 
     this.data.duesPayments.push({
       id: Date.now(),
-      from: this.duesFrom,
-      to: this.duesTo,
+      fromId: this.duesFrom,
+      toId: this.duesTo,
       amount,
       date: this.duesDate,
       note: this.duesNote.trim()
@@ -352,8 +360,8 @@ export class TrackerStoreService {
 
   editDuesPayment(payment: DuesPayment): void {
     this.duesEditId = payment.id;
-    this.duesFrom = payment.from;
-    this.duesTo = payment.to;
+    this.duesFrom = payment.fromId;
+    this.duesTo = payment.toId;
     this.duesAmount = payment.amount;
     this.duesDate = payment.date;
     this.duesNote = payment.note || '';
@@ -372,25 +380,25 @@ export class TrackerStoreService {
     this.resetDuesForm();
   }
 
-  prepareQuickDuesFor(member: string): void {
+  prepareQuickDuesFor(memberId: number): void {
     if (!this.data) return;
 
-    const selected = this.summary.find(item => item.name === member);
+    const selected = this.summary.find(item => item.id === memberId);
     const candidates = this.summary
-      .filter(item => item.name !== member && item.balance > 0.5)
+      .filter(item => item.id !== memberId && item.balance > 0.5)
       .sort((a, b) => b.balance - a.balance);
 
     this.duesEditId = null;
-    this.duesFrom = member;
+    this.duesFrom = memberId;
     this.duesTo = candidates.length
-      ? candidates[0].name
-      : this.data.members.find(item => item !== member) || member;
+      ? candidates[0].id
+      : this.data.members.find(item => item.id !== memberId)?.id || memberId;
     this.duesAmount = Number(Math.abs(selected?.balance || 0).toFixed(0));
     this.duesDate = new Date().toISOString().split('T')[0];
     this.duesNote = '';
 
     this.errorMessage = '';
-    this.successMessage = 'Dues form prefilled for ' + member + '.';
+    this.successMessage = 'Dues form prefilled for ' + this.memberName(memberId) + '.';
   }
 
   addMember(): void {
@@ -399,32 +407,37 @@ export class TrackerStoreService {
     const name = this.newMemberName.trim();
     if (!name) return;
 
-    if (this.data.members.includes(name)) {
+    if (this.data.members.some(member => member.name === name)) {
       this.errorMessage = 'Member already exists.';
       return;
     }
 
-    this.data.members.push(name);
+    const id = this.data.nextMemberId;
+    this.data.nextMemberId += 1;
+    this.data.members.push({ id, name });
     this.newMemberName = '';
     this.initializeUiDefaults();
     this.recomputeDerivedState();
     this.persistData(name + ' added.');
   }
 
-  removeMember(name: string): void {
+  removeMember(memberId: number): void {
     if (!this.data) return;
+    const name = this.memberName(memberId);
     if (!window.confirm('Remove ' + name + '? This will not alter historical records.')) return;
 
-    this.data.members = this.data.members.filter(member => member !== name);
+    this.data.members = this.data.members.filter(member => member.id !== memberId);
     this.initializeUiDefaults();
     this.recomputeDerivedState();
     this.persistData(name + ' removed.');
   }
 
-  renameMember(oldName: string): void {
+  renameMember(memberId: number): void {
     if (!this.data) return;
+    const member = this.memberById(memberId);
+    if (!member) return;
 
-    const typed = window.prompt('Edit name for ' + oldName + ':', oldName);
+    const typed = window.prompt('Edit name for ' + member.name + ':', member.name);
     if (typed === null) return;
 
     const nextName = typed.trim();
@@ -432,33 +445,14 @@ export class TrackerStoreService {
       this.errorMessage = 'Name cannot be empty.';
       return;
     }
-    if (nextName === oldName) return;
-    if (this.data.members.includes(nextName)) {
+    if (nextName === member.name) return;
+    if (this.data.members.some(m => m.name === nextName)) {
       this.errorMessage = 'Member already exists.';
       return;
     }
 
-    this.data.members = this.data.members.map(member => (member === oldName ? nextName : member));
-
-    Object.keys(this.data.attendance).forEach(sessionId => {
-      this.data!.attendance[sessionId] = (this.data!.attendance[sessionId] || []).map(name =>
-        name === oldName ? nextName : name
-      );
-    });
-
-    this.data.sessions.forEach(session => {
-      session.payments = session.payments.map(payment =>
-        payment.player === oldName ? { ...payment, player: nextName } : payment
-      );
-    });
-
-    if (this.data.duesPayments) {
-      this.data.duesPayments = this.data.duesPayments.map(payment => ({
-        ...payment,
-        from: payment.from === oldName ? nextName : payment.from,
-        to: payment.to === oldName ? nextName : payment.to
-      }));
-    }
+    const oldName = member.name;
+    member.name = nextName;
 
     this.initializeUiDefaults();
     this.recomputeDerivedState();
@@ -471,12 +465,14 @@ export class TrackerStoreService {
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  getMemberReport(member: string): MemberReport | null {
+  getMemberReport(memberId: number): MemberReport | null {
     if (!this.data) return null;
+    const member = this.memberById(memberId);
+    if (!member) return null;
 
     const sessions = this.data.sessions;
     const attendedSessions = sessions
-      .filter(session => (this.data?.attendance[String(session.id)] || []).includes(member))
+      .filter(session => (this.data?.attendance[String(session.id)] || []).includes(memberId))
       .map(session => ({
         sessionId: session.id,
         date: session.date,
@@ -487,7 +483,7 @@ export class TrackerStoreService {
     const sessionPayments = sessions
       .flatMap(session =>
         session.payments
-          .filter(payment => payment.player === member)
+          .filter(payment => payment.memberId === memberId)
           .map(payment => ({
             kind: 'session' as const,
             sessionId: session.id,
@@ -504,19 +500,19 @@ export class TrackerStoreService {
     }, 0);
 
     const duesPaidRecords = (this.data.duesPayments || [])
-      .filter(payment => payment.from === member)
+      .filter(payment => payment.fromId === memberId)
       .map(payment => ({
         kind: 'dues' as const,
         sessionId: null,
         date: payment.date,
         amount: payment.amount,
-        label: 'Dues to ' + payment.to
+        label: 'Dues to ' + this.memberName(payment.toId)
       }));
 
     const sessionPaid = sessionPayments.reduce((sum, payment) => sum + payment.amount, 0);
     const duesPaid = duesPaidRecords.reduce((sum, payment) => sum + payment.amount, 0);
     const duesReceived = (this.data.duesPayments || [])
-      .filter(payment => payment.to === member)
+      .filter(payment => payment.toId === memberId)
       .reduce((sum, payment) => sum + payment.amount, 0);
     const payments = [...sessionPayments, ...duesPaidRecords].sort((a, b) => {
       const dateCompare = a.date.localeCompare(b.date);
@@ -526,7 +522,8 @@ export class TrackerStoreService {
     const totalPaid = sessionPaid + duesPaid;
 
     return {
-      name: member,
+      id: memberId,
+      name: member.name,
       sessionsAttended: attendedSessions.length,
       totalSessions: sessions.length,
       attendanceRate: sessions.length ? Number(((attendedSessions.length / sessions.length) * 100).toFixed(1)) : 0,
@@ -545,16 +542,16 @@ export class TrackerStoreService {
     if (!this.data) return;
 
     if (this.data.members.length) {
-      if (!this.newSessionPayments[0].player || !this.data.members.includes(this.newSessionPayments[0].player)) {
-        this.newSessionPayments[0].player = this.data.members[0];
+      if (!this.newSessionPayments[0].memberId || !this.memberById(this.newSessionPayments[0].memberId)) {
+        this.newSessionPayments[0].memberId = this.data.members[0].id;
       }
 
-      if (!this.duesFrom || !this.data.members.includes(this.duesFrom)) {
-        this.duesFrom = this.data.members[0];
+      if (!this.duesFrom || !this.memberById(this.duesFrom)) {
+        this.duesFrom = this.data.members[0].id;
       }
 
-      if (!this.duesTo || !this.data.members.includes(this.duesTo) || this.duesTo === this.duesFrom) {
-        this.duesTo = this.data.members.find(member => member !== this.duesFrom) || this.duesFrom;
+      if (!this.duesTo || !this.memberById(this.duesTo) || this.duesTo === this.duesFrom) {
+        this.duesTo = this.data.members.find(member => member.id !== this.duesFrom)?.id || this.duesFrom;
       }
     }
 
@@ -592,7 +589,7 @@ export class TrackerStoreService {
   private resetSessionForm(): void {
     this.newSessionDate = '';
     this.newSessionNotes = '';
-    this.newSessionPayments = [{ player: this.data?.members[0] || '', amount: 0 }];
+    this.newSessionPayments = [{ memberId: this.data?.members[0]?.id || 0, amount: 0 }];
   }
 
   private resetDuesForm(): void {
@@ -602,22 +599,22 @@ export class TrackerStoreService {
     this.duesNote = '';
 
     if (this.data?.members?.length) {
-      this.duesFrom = this.data.members[0];
-      this.duesTo = this.data.members.find(member => member !== this.duesFrom) || this.duesFrom;
+      this.duesFrom = this.data.members[0].id;
+      this.duesTo = this.data.members.find(member => member.id !== this.duesFrom)?.id || this.duesFrom;
     }
   }
 
   private calcSummary(data: TrackerData): MemberSummary[] {
-    const owed: Record<string, number> = {};
-    const sessionPaid: Record<string, number> = {};
-    const duesPaidMap: Record<string, number> = {};
-    const duesReceivedMap: Record<string, number> = {};
+    const owed: Record<number, number> = {};
+    const sessionPaid: Record<number, number> = {};
+    const duesPaidMap: Record<number, number> = {};
+    const duesReceivedMap: Record<number, number> = {};
 
     data.members.forEach(member => {
-      owed[member] = 0;
-      sessionPaid[member] = 0;
-      duesPaidMap[member] = 0;
-      duesReceivedMap[member] = 0;
+      owed[member.id] = 0;
+      sessionPaid[member.id] = 0;
+      duesPaidMap[member.id] = 0;
+      duesReceivedMap[member.id] = 0;
     });
 
     data.sessions.forEach(session => {
@@ -625,28 +622,29 @@ export class TrackerStoreService {
       if (!attendees.length) return;
 
       const share = session.cost / attendees.length;
-      attendees.forEach(member => {
-        if (owed[member] !== undefined) owed[member] += share;
+      attendees.forEach(memberId => {
+        if (owed[memberId] !== undefined) owed[memberId] += share;
       });
 
       session.payments.forEach(payment => {
-        if (sessionPaid[payment.player] !== undefined) {
-          sessionPaid[payment.player] += payment.amount;
+        if (sessionPaid[payment.memberId] !== undefined) {
+          sessionPaid[payment.memberId] += payment.amount;
         }
       });
     });
 
     (data.duesPayments || []).forEach(payment => {
-      if (duesPaidMap[payment.from] !== undefined) duesPaidMap[payment.from] += payment.amount;
-      if (duesReceivedMap[payment.to] !== undefined) duesReceivedMap[payment.to] += payment.amount;
+      if (duesPaidMap[payment.fromId] !== undefined) duesPaidMap[payment.fromId] += payment.amount;
+      if (duesReceivedMap[payment.toId] !== undefined) duesReceivedMap[payment.toId] += payment.amount;
     });
 
     return data.members.map(member => ({
-      name: member,
-      owed: owed[member] || 0,
-      paid: sessionPaid[member] || 0,
-      duesPaid: duesPaidMap[member] || 0,
-      balance: (sessionPaid[member] || 0) - (owed[member] || 0) + (duesPaidMap[member] || 0) - (duesReceivedMap[member] || 0)
+      id: member.id,
+      name: member.name,
+      owed: owed[member.id] || 0,
+      paid: sessionPaid[member.id] || 0,
+      duesPaid: duesPaidMap[member.id] || 0,
+      balance: (sessionPaid[member.id] || 0) - (owed[member.id] || 0) + (duesPaidMap[member.id] || 0) - (duesReceivedMap[member.id] || 0)
     }));
   }
 }

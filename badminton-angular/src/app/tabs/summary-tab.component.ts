@@ -15,29 +15,29 @@ export class SummaryTabComponent {
   @ViewChild('quickAmountInput') quickAmountInput?: ElementRef<HTMLInputElement>;
 
   showQuickDuesModal = false;
-  quickDuesMember = '';
+  quickDuesMemberId: number | null = null;
   selectedMemberReport: MemberReport | null = null;
   showMemberReportModal = false;
-  actionMenuMember: string | null = null;
+  actionMenuMemberId: number | null = null;
 
   constructor(public readonly store: TrackerStoreService) {}
 
-  recordDuesFor(member: string): void {
-    this.store.prepareQuickDuesFor(member);
-    this.quickDuesMember = member;
+  recordDuesFor(memberId: number): void {
+    this.store.prepareQuickDuesFor(memberId);
+    this.quickDuesMemberId = memberId;
     this.showQuickDuesModal = true;
     this.focusAmountInput();
   }
 
   closeQuickDuesModal(): void {
     this.showQuickDuesModal = false;
-    this.quickDuesMember = '';
+    this.quickDuesMemberId = null;
   }
 
-  openMemberReport(member: string): void {
-    this.selectedMemberReport = this.store.getMemberReport(member);
+  openMemberReport(memberId: number): void {
+    this.selectedMemberReport = this.store.getMemberReport(memberId);
     this.showMemberReportModal = !!this.selectedMemberReport;
-    this.actionMenuMember = null;
+    this.actionMenuMemberId = null;
   }
 
   closeMemberReport(): void {
@@ -45,13 +45,13 @@ export class SummaryTabComponent {
     this.selectedMemberReport = null;
   }
 
-  toggleActionMenu(member: string, event: Event): void {
+  toggleActionMenu(memberId: number, event: Event): void {
     event.stopPropagation();
-    this.actionMenuMember = this.actionMenuMember === member ? null : member;
+    this.actionMenuMemberId = this.actionMenuMemberId === memberId ? null : memberId;
   }
 
   closeActionMenu(): void {
-    this.actionMenuMember = null;
+    this.actionMenuMemberId = null;
   }
 
   @HostListener('document:keydown.escape')
@@ -92,9 +92,9 @@ export class SummaryTabComponent {
     return balance > 0.5;
   }
 
-  openQuickDuesFromMenu(member: string): void {
+  openQuickDuesFromMenu(memberId: number): void {
     this.closeActionMenu();
-    this.recordDuesFor(member);
+    this.recordDuesFor(memberId);
   }
 
   private focusAmountInput(): void {

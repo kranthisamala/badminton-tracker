@@ -7,7 +7,7 @@ type DashboardChartKey = 'spendTrend' | 'attendance' | 'attendanceRate' | 'payOw
 
 export interface DashboardDrilldown {
   tab: string;
-  member?: string;
+  memberId?: number;
 }
 
 @Component({
@@ -34,10 +34,10 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
   private viewReady = false;
   private lastSignature = '';
 
-  // label arrays stored at render time so click handlers can resolve names by index
-  private attendanceRateMemberOrder: string[] = [];
-  private balanceMemberOrder: string[] = [];
-  private payOweMemberOrder: string[] = [];
+  // id arrays stored at render time so click handlers can resolve members by index
+  private attendanceRateMemberOrder: number[] = [];
+  private balanceMemberOrder: number[] = [];
+  private payOweMemberOrder: number[] = [];
 
   expandedCard: DashboardChartKey | null = null;
 
@@ -149,27 +149,28 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
     const memberBalances = sortedByBalance.map(item => Number(item.balance.toFixed(2)));
     const memberPaid = sortedByBalance.map(item => Number(item.paid.toFixed(2)));
     const memberOwed = sortedByBalance.map(item => Number(item.owed.toFixed(2)));
-    const attendanceRateRows = memberLabels.map(member => {
+    const attendanceRateRows = sortedByBalance.map(item => {
       if (totalSessions === 0) {
-        return { member, rate: 0 };
+        return { id: item.id, name: item.name, rate: 0 };
       }
 
-      const attended = sessions.filter(session => (this.store.data?.attendance[String(session.id)] || []).includes(member)).length;
+      const attended = sessions.filter(session => (this.store.data?.attendance[String(session.id)] || []).includes(item.id)).length;
       return {
-        member,
+        id: item.id,
+        name: item.name,
         rate: Number(((attended / totalSessions) * 100).toFixed(1))
       };
     });
     const sortedAttendanceRateRows = attendanceRateRows
       .slice()
-      .sort((a, b) => b.rate - a.rate || a.member.localeCompare(b.member));
-    const attendanceRateLabels = sortedAttendanceRateRows.map(item => item.member);
+      .sort((a, b) => b.rate - a.rate || a.name.localeCompare(b.name));
+    const attendanceRateLabels = sortedAttendanceRateRows.map(item => item.name);
     const attendanceRate = sortedAttendanceRateRows.map(item => item.rate);
 
-    // Store label order for click handler resolution
-    this.attendanceRateMemberOrder = sortedAttendanceRateRows.map(row => row.member);
-    this.balanceMemberOrder = sortedByBalance.map(item => item.name);
-    this.payOweMemberOrder = sortedByBalance.map(item => item.name);
+    // Store id order for click handler resolution
+    this.attendanceRateMemberOrder = sortedAttendanceRateRows.map(row => row.id);
+    this.balanceMemberOrder = sortedByBalance.map(item => item.id);
+    this.payOweMemberOrder = sortedByBalance.map(item => item.id);
 
     const baseScales = {
       x: { ticks: { color: '#9bb0a2' }, grid: { color: '#2a332e' } },
@@ -245,8 +246,8 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
         maintainAspectRatio: false,
         onClick: (_event: ChartEvent, elements: ActiveElement[]) => {
           if (!elements.length) return;
-          const member = this.balanceMemberOrder[elements[0].index];
-          if (member) this.drilldown.emit({ tab: 'members', member });
+          const memberId = this.balanceMemberOrder[elements[0].index];
+          if (memberId) this.drilldown.emit({ tab: 'members', memberId });
         },
         plugins: { legend: { labels: { color: '#c8d8ce' } } },
         scales: baseScales
@@ -272,8 +273,8 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
         indexAxis: 'y',
         onClick: (_event: ChartEvent, elements: ActiveElement[]) => {
           if (!elements.length) return;
-          const member = this.attendanceRateMemberOrder[elements[0].index];
-          if (member) this.drilldown.emit({ tab: 'members', member });
+          const memberId = this.attendanceRateMemberOrder[elements[0].index];
+          if (memberId) this.drilldown.emit({ tab: 'members', memberId });
         },
         plugins: { legend: { labels: { color: '#c8d8ce' } } },
         scales: {
@@ -305,8 +306,8 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
         maintainAspectRatio: false,
         onClick: (_event: ChartEvent, elements: ActiveElement[]) => {
           if (!elements.length) return;
-          const member = this.payOweMemberOrder[elements[0].index];
-          if (member) this.drilldown.emit({ tab: 'members', member });
+          const memberId = this.payOweMemberOrder[elements[0].index];
+          if (memberId) this.drilldown.emit({ tab: 'members', memberId });
         },
         plugins: { legend: { labels: { color: '#c8d8ce' } } },
         scales: baseScales

@@ -13,12 +13,12 @@
     <div class="player-card-head">
       <h2>{{ player.name }}</h2>
       <div class="summary-card-menu">
-        <button class="card-menu-trigger ghost-btn" type="button" (click)="toggleActionMenu(player.name, $event)" aria-label="Open member actions">
+        <button class="card-menu-trigger ghost-btn" type="button" (click)="toggleActionMenu(player.id, $event)" aria-label="Open member actions">
           ⋮
         </button>
-        <div class="card-menu" *ngIf="actionMenuMember === player.name">
-          <button type="button" (click)="openMemberReport(player.name)">View Report</button>
-          <button type="button" *ngIf="isOwing(player.balance)" (click)="openQuickDuesFromMenu(player.name)">Record Dues</button>
+        <div class="card-menu" *ngIf="actionMenuMemberId === player.id">
+          <button type="button" (click)="openMemberReport(player.id)">View Report</button>
+          <button type="button" *ngIf="isOwing(player.balance)" (click)="openQuickDuesFromMenu(player.id)">Record Dues</button>
         </div>
       </div>
     </div>
@@ -51,9 +51,9 @@
 <app-member-report-modal *ngIf="showMemberReportModal && selectedMemberReport" [report]="selectedMemberReport" (closed)="closeMemberReport()"></app-member-report-modal>
 
 <div class="modal-overlay no-print" *ngIf="showQuickDuesModal" (click)="closeQuickDuesModal()">
-  <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="'Record dues for ' + quickDuesMember" (click)="$event.stopPropagation()">
+  <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="'Record dues for ' + store.memberName(quickDuesMemberId || 0)" (click)="$event.stopPropagation()">
     <div class="modal-head">
-      <h3>Record Dues for {{ quickDuesMember }}</h3>
+      <h3>Record Dues for {{ store.memberName(quickDuesMemberId || 0) }}</h3>
       <button class="ghost-btn" type="button" (click)="closeQuickDuesModal()">Close</button>
     </div>
 
@@ -61,13 +61,13 @@
       <label>
         Paid By
         <select [(ngModel)]="store.duesFrom">
-          <option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</option>
+          <option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</option>
         </select>
       </label>
       <label>
         Paid To
         <select [(ngModel)]="store.duesTo">
-          <option *ngFor="let member of store.data?.members" [value]="member">{{ member }}</option>
+          <option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</option>
         </select>
       </label>
       <label>

@@ -10,10 +10,10 @@
       </thead>
       <tbody>
         <tr *ngFor="let member of store.data?.members">
-          <td>{{ member }}</td>
+          <td>{{ member.name }}</td>
           <td *ngFor="let session of store.sortedSessions">
-            <button class="att-btn" [class.present]="store.isPresent(session.id, member)" (click)="store.toggleAttendance(session.id, member)">
-              {{ store.isPresent(session.id, member) ? '✓' : '' }}
+            <button class="att-btn" [class.present]="store.isPresent(session.id, member.id)" (click)="store.toggleAttendance(session.id, member.id)">
+              {{ store.isPresent(session.id, member.id) ? '✓' : '' }}
             </button>
           </td>
         </tr>

@@ -30,15 +30,15 @@ export class MembersTabComponent implements OnInit {
   constructor(public readonly store: TrackerStoreService) {}
 
   ngOnInit(): void {
-    if (this.store.pendingDrilldownMember) {
-      const member = this.store.pendingDrilldownMember;
-      this.store.pendingDrilldownMember = null;
-      setTimeout(() => this.openMemberReport(member), 0);
+    if (this.store.pendingDrilldownMemberId !== null) {
+      const memberId = this.store.pendingDrilldownMemberId;
+      this.store.pendingDrilldownMemberId = null;
+      setTimeout(() => this.openMemberReport(memberId), 0);
     }
   }
 
-  openMemberReport(member: string): void {
-    this.selectedMemberReport = this.store.getMemberReport(member);
+  openMemberReport(memberId: number): void {
+    this.selectedMemberReport = this.store.getMemberReport(memberId);
     this.showMemberReportModal = !!this.selectedMemberReport;
   }
 

@@ -19,10 +19,10 @@
     <!-- Already-in-session members shown as removable chips -->
     <mat-chip-grid #chipGrid aria-label="Session members">
       <mat-chip
-        *ngFor="let member of store.quickSessionAttendees"
-        (removed)="removeFromSession(member)"
+        *ngFor="let memberId of store.quickSessionAttendees"
+        (removed)="removeFromSession(memberId)"
         class="member-chip">
-        {{ member }}
+        {{ store.memberName(memberId) }}
         <button matChipRemove aria-label="Remove">×</button>
       </mat-chip>
     </mat-chip-grid>
@@ -44,9 +44,9 @@
       (optionSelected)="onOptionSelected($event)">
       <mat-option
         *ngFor="let member of store.quickAttendanceDropdownMembers"
-        [value]="member"
+        [value]="member.name"
         class="member-ac-option">
-        {{ member }}
+        {{ member.name }}
       </mat-option>
       <mat-option *ngIf="!store.quickAttendanceDropdownMembers.length" disabled class="member-ac-empty">
         All members added

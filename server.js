@@ -12,7 +12,8 @@ const DEFAULT_DATA = {
   sessions: [],
   attendance: {},
   duesPayments: [],
-  nextId: 1
+  nextId: 1,
+  nextMemberId: 1
 };
 
 function setCorsHeaders(res) {
@@ -32,9 +33,12 @@ function sendJson(res, statusCode, payload) {
 function isValidTrackerData(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
   if (!Array.isArray(data.members)) return false;
+  if (!data.members.every(m => m && typeof m === 'object' && typeof m.id === 'number' && typeof m.name === 'string')) return false;
   if (!Array.isArray(data.sessions)) return false;
   if (!data.attendance || typeof data.attendance !== 'object' || Array.isArray(data.attendance)) return false;
+  if (!Object.values(data.attendance).every(ids => Array.isArray(ids) && ids.every(id => typeof id === 'number'))) return false;
   if (typeof data.nextId !== 'number') return false;
+  if (typeof data.nextMemberId !== 'number') return false;
   if (data.duesPayments !== undefined && !Array.isArray(data.duesPayments)) return false;
   return true;
 }

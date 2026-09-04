@@ -2,11 +2,11 @@
   <h2 class="section-title">Current Members ({{ store.data?.members?.length || 0 }})</h2>
   <div class="chip-grid" *ngIf="store.data?.members?.length; else noMembers">
     <div class="chip" *ngFor="let member of store.data?.members">
-      <span>{{ member }}</span>
+      <span>{{ member.name }}</span>
       <div class="chip-actions">
-        <button mat-stroked-button (click)="openMemberReport(member)">Report</button>
-        <button mat-stroked-button (click)="store.renameMember(member)">Rename</button>
-        <button mat-stroked-button color="warn" (click)="store.removeMember(member)">Remove</button>
+        <button mat-stroked-button (click)="openMemberReport(member.id)">Report</button>
+        <button mat-stroked-button (click)="store.renameMember(member.id)">Rename</button>
+        <button mat-stroked-button color="warn" (click)="store.removeMember(member.id)">Remove</button>
       </div>
     </div>
   </div>
