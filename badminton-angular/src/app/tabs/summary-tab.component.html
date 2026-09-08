@@ -38,7 +38,10 @@
     <p class="balance receive" *ngIf="isReceiving(player.balance)">
       Rs {{ player.balance | number:'1.0-0' }} to receive
     </p>
-    <p class="balance owe" *ngIf="isOwing(player.balance)">
+    <button type="button" class="balance owe" *ngIf="isOwing(player.balance) && store.canEdit" (click)="recordDuesFor(player.id)">
+      Owes Rs {{ (player.balance * -1) | number:'1.0-0' }}
+    </button>
+    <p class="balance owe" *ngIf="isOwing(player.balance) && !store.canEdit">
       Owes Rs {{ (player.balance * -1) | number:'1.0-0' }}
     </p>
     <p class="balance settled" *ngIf="isSettled(player.balance)">
@@ -57,37 +60,36 @@
       <button class="ghost-btn" type="button" (click)="closeQuickDuesModal()">Close</button>
     </div>
 
-    <div class="form-grid">
-      <label>
-        Paid By
-        <select [(ngModel)]="store.duesFrom">
-          <option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</option>
-        </select>
-      </label>
-      <label>
-        Paid To
-        <select [(ngModel)]="store.duesTo">
-          <option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</option>
-        </select>
-      </label>
-      <label>
-        Amount
-        <input #quickAmountInput type="number" min="0" [(ngModel)]="store.duesAmount" />
-      </label>
-      <label>
-        Date
-        <input type="date" [(ngModel)]="store.duesDate" />
-      </label>
+    <div class="tab-form-grid">
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Paid By</mat-label>
+        <mat-select [(ngModel)]="store.duesFrom">
+          <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Paid To</mat-label>
+        <mat-select [(ngModel)]="store.duesTo">
+          <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Amount (Rs)</mat-label>
+        <input matInput #quickAmountInput type="number" min="0" [(ngModel)]="store.duesAmount" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Date</mat-label>
+        <input matInput type="date" [(ngModel)]="store.duesDate" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Note (optional)</mat-label>
+        <input matInput type="text" [(ngModel)]="store.duesNote" placeholder="e.g. UPI transfer" />
+      </mat-form-field>
     </div>
 
-    <label class="dues-note">
-      Note (optional)
-      <input type="text" [(ngModel)]="store.duesNote" placeholder="e.g. UPI transfer" />
-    </label>
-
     <div class="actions-row">
-      <button class="primary-btn" type="button" (click)="submitQuickDues()">Record Payment</button>
-      <button class="ghost-btn" type="button" (click)="closeQuickDuesModal()">Cancel</button>
+      <button mat-flat-button color="primary" type="button" (click)="submitQuickDues()">Record Payment</button>
+      <button mat-stroked-button type="button" (click)="closeQuickDuesModal()">Cancel</button>
     </div>
   </section>
 </div>

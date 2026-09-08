@@ -1,15 +1,20 @@
 <main class="page">
   <header class="page-header">
-    <h1>Badminton Tracker</h1>
+    <span class="brand-icon">🏸</span>
+    <h1>Badminton <span>Tracker</span></h1>
   </header>
 
-  <app-login *ngIf="!auth.user"></app-login>
-
-  <app-change-password *ngIf="auth.user && auth.mustChangePassword"></app-change-password>
+  <div class="auth-shell" *ngIf="!auth.user || auth.mustChangePassword">
+    <app-login *ngIf="!auth.user"></app-login>
+    <app-change-password *ngIf="auth.user && auth.mustChangePassword"></app-change-password>
+  </div>
 
   <ng-container *ngIf="auth.user && !auth.mustChangePassword">
     <div class="account-bar no-print">
-      <span>{{ auth.username || auth.user.uid }} · {{ auth.role || 'pending role' }}</span>
+      <span class="account-identity">
+        <span class="username">{{ auth.username || auth.user.uid }}</span>
+        <span class="role-badge" [class.role-editor]="auth.role === 'editor'" [class.role-owner]="auth.role === 'owner'">{{ auth.role || 'pending' }}</span>
+      </span>
       <button class="ghost-btn" type="button" (click)="signOut()">Sign out</button>
     </div>
 

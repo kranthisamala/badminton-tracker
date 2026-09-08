@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, DoCheck, ElementRef, EventEmitter, HostListener, OnDestroy, Output, ViewChild } from '@angular/core';
 import { ActiveElement, Chart, ChartEvent } from 'chart.js/auto';
+import { CHART_COLORS } from '../chart-colors';
 import { TrackerStoreService } from '../state/tracker-store.service';
 
 type DashboardChartKey = 'spendTrend' | 'attendance' | 'attendanceRate' | 'payOwe' | 'balance';
@@ -86,7 +87,7 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
     const ctx = tmp.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#161a18';
+    ctx.fillStyle = CHART_COLORS.bgCard;
     ctx.fillRect(0, 0, tmp.width, tmp.height);
     ctx.drawImage(canvas, 0, 0);
 
@@ -173,8 +174,8 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
     this.payOweMemberOrder = sortedByBalance.map(item => item.id);
 
     const baseScales = {
-      x: { ticks: { color: '#9bb0a2' }, grid: { color: '#2a332e' } },
-      y: { ticks: { color: '#9bb0a2' }, grid: { color: '#2a332e' } }
+      x: { ticks: { color: CHART_COLORS.textNeutral }, grid: { color: CHART_COLORS.border } },
+      y: { ticks: { color: CHART_COLORS.textNeutral }, grid: { color: CHART_COLORS.border } }
     };
 
     this.spendChart = new Chart(this.spendTrendCanvas.nativeElement, {
@@ -185,8 +186,8 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           {
             label: 'Session Cost (Rs)',
             data: sessionCosts,
-            borderColor: '#4ade80',
-            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+            borderColor: CHART_COLORS.accent,
+            backgroundColor: CHART_COLORS.accentFill,
             fill: true,
             tension: 0.25
           }
@@ -199,7 +200,7 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           if (!elements.length) return;
           this.drilldown.emit({ tab: 'sessions' });
         },
-        plugins: { legend: { labels: { color: '#c8d8ce' } } },
+        plugins: { legend: { labels: { color: CHART_COLORS.legendText } } },
         scales: baseScales
       }
     });
@@ -212,7 +213,7 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           {
             label: 'Attendees',
             data: attendanceCounts,
-            backgroundColor: '#22c55e',
+            backgroundColor: CHART_COLORS.accent,
             borderRadius: 6
           }
         ]
@@ -224,7 +225,7 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           if (!elements.length) return;
           this.drilldown.emit({ tab: 'attendance' });
         },
-        plugins: { legend: { labels: { color: '#c8d8ce' } } },
+        plugins: { legend: { labels: { color: CHART_COLORS.legendText } } },
         scales: baseScales
       }
     });
@@ -237,7 +238,7 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           {
             label: 'Net Balance (Rs)',
             data: memberBalances,
-            backgroundColor: memberBalances.map(value => (value >= 0 ? '#4ade80' : '#f87171'))
+            backgroundColor: memberBalances.map(value => (value >= 0 ? CHART_COLORS.accent : CHART_COLORS.danger))
           }
         ]
       },
@@ -249,7 +250,7 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           const memberId = this.balanceMemberOrder[elements[0].index];
           if (memberId) this.drilldown.emit({ tab: 'members', memberId });
         },
-        plugins: { legend: { labels: { color: '#c8d8ce' } } },
+        plugins: { legend: { labels: { color: CHART_COLORS.legendText } } },
         scales: baseScales
       }
     });
@@ -262,7 +263,7 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           {
             label: 'Attendance Rate (%)',
             data: attendanceRate,
-            backgroundColor: '#60a5fa',
+            backgroundColor: CHART_COLORS.info,
             borderRadius: 6
           }
         ]
@@ -276,10 +277,10 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           const memberId = this.attendanceRateMemberOrder[elements[0].index];
           if (memberId) this.drilldown.emit({ tab: 'members', memberId });
         },
-        plugins: { legend: { labels: { color: '#c8d8ce' } } },
+        plugins: { legend: { labels: { color: CHART_COLORS.legendText } } },
         scales: {
-          x: { ticks: { color: '#9bb0a2' }, grid: { color: '#2a332e' }, min: 0, max: 100 },
-          y: { ticks: { color: '#9bb0a2' }, grid: { color: '#2a332e' } }
+          x: { ticks: { color: CHART_COLORS.textNeutral }, grid: { color: CHART_COLORS.border }, min: 0, max: 100 },
+          y: { ticks: { color: CHART_COLORS.textNeutral }, grid: { color: CHART_COLORS.border } }
         }
       }
     });
@@ -292,12 +293,12 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           {
             label: 'Paid (Rs)',
             data: memberPaid,
-            backgroundColor: '#4ade80'
+            backgroundColor: CHART_COLORS.accent
           },
           {
             label: 'Owed (Rs)',
             data: memberOwed,
-            backgroundColor: '#f59e0b'
+            backgroundColor: CHART_COLORS.warning
           }
         ]
       },
@@ -309,7 +310,7 @@ export class DashboardTabComponent implements AfterViewInit, DoCheck, OnDestroy 
           const memberId = this.payOweMemberOrder[elements[0].index];
           if (memberId) this.drilldown.emit({ tab: 'members', memberId });
         },
-        plugins: { legend: { labels: { color: '#c8d8ce' } } },
+        plugins: { legend: { labels: { color: CHART_COLORS.legendText } } },
         scales: baseScales
       }
     });

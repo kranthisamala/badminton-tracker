@@ -1,6 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MemberReportModalComponent } from '../components/member-report-modal.component';
 import { MemberReport } from '../models';
 import { TrackerStoreService } from '../state/tracker-store.service';
@@ -8,7 +12,15 @@ import { TrackerStoreService } from '../state/tracker-store.service';
 @Component({
   selector: 'app-summary-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, MemberReportModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MemberReportModalComponent
+  ],
   templateUrl: './summary-tab.component.html'
 })
 export class SummaryTabComponent {

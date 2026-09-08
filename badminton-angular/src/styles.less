@@ -1,4 +1,5 @@
 @import (less) '../node_modules/@angular/material/prebuilt-themes/indigo-pink.css';
+@import (css) url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap');
 @import './theme.less';
 
 * {
@@ -8,25 +9,98 @@
 body {
   margin: 0;
   background: @bg-page;
+  font-family: 'Archivo', system-ui, sans-serif;
+}
+
+html {
+  color-scheme: light;
 }
 
 .page {
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 28px 24px 64px;
   color: @text-main;
   background: @bg-page;
   min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Archivo', system-ui, sans-serif;
+  line-height: 1.4;
+}
+
+// ── Material components: recolor the stock indigo-pink theme's structural
+//    CSS to the Modernist tokens above, rather than replacing it outright
+//    (removing the prebuilt theme would drop Material's base layout/ripple
+//    CSS along with its colors). Buttons in particular need an explicit
+//    background/border override — the prebuilt theme's own selectors are
+//    more specific than a plain `.mat-primary` custom-property rule, so
+//    the CSS variables alone were losing the cascade and rendering the
+//    stock indigo instead of the app's accent.
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary {
+  background-color: @accent !important;
+  color: @bg-page !important;
+  border-radius: 0 !important;
+  font-family: 'Archivo', system-ui, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+.mat-mdc-unelevated-button.mat-primary:hover,
+.mat-mdc-raised-button.mat-primary:hover {
+  background-color: @accent-hover !important;
+}
+
+.mat-mdc-outlined-button {
+  border-color: @border-strong !important;
+  border-width: 2px !important;
+  color: @text-main !important;
+  border-radius: 0 !important;
+  font-family: 'Archivo', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+}
+
+.mat-mdc-outlined-button.mat-warn {
+  border-color: @accent !important;
+  color: @accent-active !important;
+}
+
+.mat-mdc-button,
+.mat-mdc-icon-button {
+  font-family: 'Archivo', system-ui, sans-serif !important;
+  border-radius: 0 !important;
 }
 
 .page-header {
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid @border-base;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 0;
+  background: @surface-strong;
+  border: 1px solid fade(@accent, 30%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
 }
 
 .page-header h1 {
   margin: 0;
+  color: @text-main;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.page-header h1 span {
   color: @accent;
-  font-size: 1.7rem;
 }
 
 .page-header p {
@@ -35,10 +109,49 @@ body {
   font-size: 0.95rem;
 }
 
+// ── Sign-in / first-run password screens ──
+.auth-shell {
+  min-height: calc(100vh - 220px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.login-card {
+  width: min(420px, 100%);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+}
+
+.login-card .section-title {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+.login-card .dashboard-subtitle {
+  margin-bottom: 8px;
+}
+
+.login-card .tab-form-grid {
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 20px;
+  margin-bottom: 4px;
+}
+
+.login-card .actions-row {
+  margin-top: 20px;
+}
+
+.login-card .actions-row button {
+  width: 100%;
+  justify-content: center;
+}
+
 .tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 6px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
@@ -47,43 +160,92 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
+  background: @bg-card;
+  border: 1px solid @border-base;
+  border-radius: 0;
+  padding: 10px 14px;
   color: @text-muted;
-  font-size: 0.9rem;
-  margin-bottom: 14px;
+  font-size: 0.86rem;
+  margin-bottom: 16px;
   flex-wrap: wrap;
 }
 
-.view-only-banner {
+.account-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.account-identity .username {
+  color: @text-soft;
+  font-weight: 600;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0;
+  padding: 2px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: @bg-input;
+  color: @text-neutral;
   border: 1px solid @border-base;
+}
+
+.role-badge.role-editor,
+.role-badge.role-owner {
+  background: @surface-strong;
+  color: @accent;
+  border-color: fade(@accent, 35%);
+}
+
+.view-only-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid @border-base;
+  border-left: 3px solid @accent;
   background: @bg-card;
   color: @text-neutral;
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin-bottom: 14px;
-  font-size: 0.9rem;
+  border-radius: 0;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
 }
 
 .tab {
   border: 1px solid @border-base;
   background: @bg-card;
   color: @text-muted;
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 0;
+  padding: 8px 16px;
+  font-size: 0.86rem;
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tab:hover {
+  border-color: fade(@accent, 45%);
+  color: @text-soft;
 }
 
 .tab.active {
-  color: @accent;
+  color: @bg-page;
+  background: @accent;
   border-color: @accent;
+  font-weight: 600;
 }
 
 .total-card,
 .state-card {
   background: @bg-card;
   border: 1px solid @border-base;
-  border-radius: 12px;
-  padding: 16px 18px;
+  border-radius: 0;
+  padding: 18px 20px;
   margin-bottom: 18px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset, 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
 .total-card {
@@ -117,12 +279,6 @@ body {
   font-size: 1rem;
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 10px;
-}
-
 .quick-field {
   width: 100%;
 }
@@ -140,12 +296,6 @@ body {
   margin-bottom: 8px;
 }
 
-.quick-actions-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
 // ── Material chip-field (member multi-search) ──
 .member-chip-field {
   // Push chip content below the floating label using Material's own token
@@ -159,31 +309,31 @@ body {
   }
 }
 
-// Chips inside the field — pill style matching project theme
+// Chips inside the field — flat tag style matching the Modernist system
 .member-chip.mat-mdc-chip {
-  --mdc-chip-container-shape-radius: 999px;
-  --mdc-chip-elevated-container-color: rgba(74, 222, 128, 0.14);
-  --mdc-chip-label-text-color: #4ade80;
-  --mdc-chip-with-trailing-icon-trailing-icon-color: #4ade80;
-  --mdc-chip-with-icon-icon-color: #4ade80;
+  --mdc-chip-container-shape-radius: 0;
+  --mdc-chip-elevated-container-color: @accent-tint;
+  --mdc-chip-label-text-color: @accent-active;
+  --mdc-chip-with-trailing-icon-trailing-icon-color: @accent-active;
+  --mdc-chip-with-icon-icon-color: @accent-active;
 
-  border: 1px solid rgba(74, 222, 128, 0.35);
+  border: 1px solid @accent;
   font-size: 0.82rem;
 
   // The ×  remove button
   .mat-mdc-chip-remove {
     font-size: 1rem;
-    color: #6b8070;
+    color: @icon-muted;
     opacity: 1;
-    &:hover { color: #f87171; }
+    &:hover { color: @danger; }
   }
 }
 
 // Autocomplete panel — stretch to form-field width
 .mat-mdc-autocomplete-panel {
-  background: #161a18 !important;
-  border: 1px solid #2a332e;
-  border-radius: 10px !important;
+  background: @bg-card !important;
+  border: 1px solid @border-base;
+  border-radius: 0 !important;
   min-width: 100% !important;
   width: 100% !important;
   max-width: none !important;
@@ -191,7 +341,7 @@ body {
 
 // Options inside autocomplete
 .member-ac-option {
-  color: #e8f0eb !important;
+  color: @text-main !important;
   height: 44px !important;
   min-height: 44px;
   line-height: 44px;
@@ -199,11 +349,11 @@ body {
   .mdc-list-item__primary-text { width: 100%; }
 
   &:hover:not(.mdc-list-item--disabled),
-  &.mat-mdc-option-active { background: rgba(74, 222, 128, 0.08) !important; }
+  &.mat-mdc-option-active { background: fade(@accent, 8%) !important; }
 }
 
 .member-ac-empty {
-  color: #8aa090 !important;
+  color: @text-muted !important;
   font-style: italic;
   padding: 12px 16px !important;
 }
@@ -256,13 +406,38 @@ body {
 
 .mat-mdc-form-field {
   --mdc-outlined-text-field-container-color: @bg-input;
-  --mdc-outlined-text-field-outline-color: @border-base;
+  --mdc-outlined-text-field-outline-color: @border-strong;
   --mdc-outlined-text-field-focus-outline-color: @accent;
-  --mdc-outlined-text-field-hover-outline-color: lighten(@border-base, 10%);
+  --mdc-outlined-text-field-hover-outline-color: @border-strong;
+  --mdc-outlined-text-field-outline-width: 2px;
+  --mdc-outlined-text-field-focus-outline-width: 2px;
+  --mdc-outlined-text-field-container-shape: 0;
   --mdc-outlined-text-field-input-text-color: @text-main;
   --mat-select-enabled-trigger-text-color: @text-main;
   --mat-select-enabled-arrow-color: @text-muted;
   --mat-form-field-focus-select-arrow-color: @accent;
+  font-family: 'Archivo', system-ui, sans-serif;
+}
+
+// Material's own defaults read as cramped against the 2px Modernist
+// outline — give the input area explicit, generous breathing room on
+// all sides instead.
+.mat-mdc-form-field .mat-mdc-form-field-infix {
+  padding-top: 20px !important;
+  padding-bottom: 14px !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  min-height: unset !important;
+}
+
+.mat-mdc-form-field .mat-mdc-form-field-flex {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.mat-mdc-form-field input.mat-mdc-input-element,
+.mat-mdc-form-field .mat-mdc-select-value {
+  padding: 0 !important;
 }
 
 .mat-mdc-form-field .mdc-floating-label,
@@ -276,13 +451,13 @@ body {
 }
 
 .mat-mdc-form-field.mat-focused .mdc-floating-label {
-  color: @accent !important;
+  color: @accent-active !important;
 }
 
 .mat-mdc-form-field .mdc-notched-outline__leading,
 .mat-mdc-form-field .mdc-notched-outline__notch,
 .mat-mdc-form-field .mdc-notched-outline__trailing {
-  border-color: @border-base !important;
+  border-color: @border-strong !important;
 }
 
 .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
@@ -337,7 +512,7 @@ body {
 .payments-box {
   margin-top: 14px;
   border: 1px solid @border-base;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 10px;
 }
 
@@ -361,39 +536,25 @@ body {
 
 .actions-row {
   margin-top: 12px;
-}
-
-.primary-btn,
-.ghost-btn,
-.delete-btn {
-  border-radius: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.primary-btn {
-  border: none;
-  background: @accent;
-  color: @bg-page;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .ghost-btn {
+  border-radius: 0;
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
   border: 1px solid @border-base;
   background: @bg-input;
-  color: #c8d8ce;
+  color: @text-soft;
 }
 
 .ghost-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.delete-btn {
-  border: 1px solid @danger-border;
-  background: @danger-bg;
-  color: @danger;
 }
 
 .session-list {
@@ -405,7 +566,7 @@ body {
 .session-card {
   border: 1px solid @border-base;
   background: @bg-card;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 12px;
 }
 
@@ -466,12 +627,6 @@ body {
   margin-bottom: 0;
 }
 
-.session-edit-actions {
-  margin-top: 14px;
-  display: flex;
-  gap: 10px;
-}
-
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -481,7 +636,7 @@ body {
 .player-card {
   background: @bg-card;
   border: 1px solid @border-base;
-  border-radius: 12px;
+  border-radius: 0;
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -524,7 +679,7 @@ body {
   min-width: 150px;
   background: @bg-input;
   border: 1px solid @border-base;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 6px;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
   display: flex;
@@ -539,7 +694,7 @@ body {
   color: @text-main;
   text-align: left;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -562,14 +717,31 @@ body {
 .balance {
   margin: auto 0 0;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 0;
   text-align: center;
   font-size: 0.85rem;
 }
 
+button.balance {
+  width: 100%;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+button.balance:hover {
+  filter: brightness(1.2);
+}
+
+button.balance:focus-visible {
+  outline: 2px solid @accent;
+  outline-offset: 2px;
+}
+
 .balance.receive {
   background: @surface-strong;
-  color: @accent;
+  color: @bg-page;
 }
 
 .balance.owe {
@@ -617,7 +789,7 @@ body {
 .att-btn {
   width: 30px;
   height: 30px;
-  border-radius: 7px;
+  border-radius: 0;
   border: 1px solid @border-base;
   background: transparent;
   color: @text-muted;
@@ -639,88 +811,18 @@ body {
 .chip {
   border: 1px solid @border-base;
   background: @bg-input;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 10px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .chip-actions {
   display: flex;
-  gap: 6px;
-}
-
-.quick-suggestions {
-  display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-}
-
-.material-picker {
-  border: 1px solid @border-base;
-  background: @bg-input;
-  border-radius: 12px;
-  padding: 10px;
-}
-
-.material-picker-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  color: @text-muted;
-  font-size: 0.82rem;
-}
-
-.material-picker-list {
-  max-height: 240px;
-  overflow: auto;
-  border: 1px solid @border-base;
-  border-radius: 10px;
-  background: @bg-card;
-}
-
-.material-option {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  padding: 10px 12px;
-  cursor: pointer;
-  border-bottom: 1px solid @border-base;
-  color: @text-main;
-}
-
-.material-option:last-child {
-  border-bottom: none;
-}
-
-.material-option:hover {
-  background: #26302b;
-}
-
-.material-option input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
-  accent-color: @accent;
-  margin: 0;
-}
-
-.material-add-btn {
-  margin-top: 10px;
-  width: 100%;
-}
-
-.material-empty {
-  margin: 0;
-  padding: 12px;
-  color: @text-muted;
-  border: 1px solid @border-base;
-  border-radius: 10px;
-  background: @bg-card;
+  gap: 6px;
 }
 
 .summary-actions {
@@ -728,36 +830,6 @@ body {
   justify-content: flex-end;
   gap: 8px;
   margin-bottom: 12px;
-}
-
-.summary-card-actions {
-  min-height: 34px;
-  margin-top: 8px;
-  display: flex;
-  align-items: flex-end;
-}
-
-.quick-dues-btn {
-  width: 100%;
-  border: 1px solid @quick-action-border;
-  background: @quick-action-bg;
-  color: @quick-action-text;
-  border-radius: 8px;
-  padding: 7px 10px;
-  cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-}
-
-.quick-dues-btn:hover {
-  filter: brightness(1.08);
-}
-
-.quick-dues-btn:focus-visible {
-  outline: 2px solid @accent;
-  outline-offset: 1px;
 }
 
 .dashboard-subtitle {
@@ -795,9 +867,6 @@ body {
   margin-top: 14px;
 }
 
-.dues-note {
-  margin-top: 8px;
-}
 
 .modal-overlay {
   position: fixed;
@@ -814,7 +883,7 @@ body {
   width: min(760px, 100%);
   background: @bg-card;
   border: 1px solid @border-base;
-  border-radius: 12px;
+  border-radius: 0;
   padding: 16px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
 }
@@ -851,7 +920,7 @@ body {
   gap: 10px;
   background: @bg-card;
   border: 1px solid @border-base;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 10px 12px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
 }
@@ -877,7 +946,7 @@ body {
   height: 28px;
   padding: 0;
   line-height: 1;
-  border-radius: 6px;
+  border-radius: 0;
 }
 
 .member-report-modal {

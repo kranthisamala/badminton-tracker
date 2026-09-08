@@ -1,53 +1,76 @@
 // ─────────────────────────────────────────────────────────
-//  Badminton Tracker — Design Tokens
+//  Badminton Tracker — Design Tokens ("Modernist" system)
+//  Flat, architectural, near-mono red-on-off-white, Archivo
+//  throughout, zero corner radius, strong 2px rules.
 //  Single source of truth for all colors used in the app.
 //  Import this file in styles.less and any component .less file.
 // ─────────────────────────────────────────────────────────
 
 // ── Backgrounds
-@bg-page:           #0d0f0e;   // deepest background (body)
-@bg-card:           #161a18;   // card / panel surface
-@bg-input:          #1e2421;   // input / select background
+@bg-page:           #f3f2f2;   // ground
+@bg-card:           #eae9e9;   // surface / panel
+@bg-input:          #ffffff;   // input / select background
+
+// ── Ink (also doubles as a solid "strong fill" for badges/active states)
+@ink:               #201e1d;
 
 // ── Borders
-@border-base:       #2a332e;   // default border
-@border-focus:      #4ade80;   // focused / active border (= accent)
+@border-base:       fade(@ink, 25%);   // minor 1px rules (table rows, chip dividers)
+@border-strong:     @ink;              // major 2px rules (cards, headers, nav)
+@border-focus:      @accent;           // focused / active border
 
 // ── Text
-@text-main:         #e8f0eb;   // primary readable text
-@text-soft:         #d8e4dc;   // slightly dimmed text
-@text-muted:        #8aa090;   // labels, placeholders, secondary text
-@text-neutral:      #9bb0a2;   // mid-tone neutral text
+@text-main:         @ink;      // primary readable text
+@text-soft:         #444141;   // secondary body copy
+@text-muted:        #605d5d;   // labels, meta, placeholders
+@text-neutral:      #7d7979;   // least emphasis (neutral-600 ramp step)
 
-// ── Accent (green)
-@accent:            #4ade80;   // primary brand green
-@accent-light:      #86efac;   // lighter green (success, hover)
-@surface-strong:    #0d3320;   // dark green fill (active states)
+// ── Accent (red) — used sparingly: primary action + money-owed emphasis
+@accent:            #ec3013;   // base
+@accent-hover:      #dd2b0f;   // hover (accent-600)
+@accent-active:      #ae1800;  // pressed / deep-red body text (accent-700)
+@accent-tint:       #fff2ef;   // light fill for banners/highlights (accent-100)
+@accent-light:      #ff9783;   // accent-400 — hover text on dark ink fills
 
-// ── Danger (red)
-@danger:            #f87171;   // error / delete text
-@danger-bg:         #3f1212;   // error / delete background
-@danger-border:     #7f2020;   // error / delete border
+// "Strong fill" — ink used as a solid badge/active-state background
+// (e.g. positive balances, active nav item), matching the mockup's
+// black-chip treatment rather than a second accent color (mono scheme).
+@surface-strong:    @ink;
 
-// ── Success
-@success:           #86efac;
-@success-border:    #1f5c38;
+// ── Danger / owing — deep accent red, not the raw accent (readme:
+//    "prefer a deep ramp step... rather than the accent itself" for
+//    paragraph-sized text)
+@danger:            @accent-active;
+@danger-bg:         @accent-tint;
+@danger-border:     @accent;
+
+// ── Success — mono system has no second accent; confirmations use ink
+@success:           @ink;
+@success-border:    @ink;
 
 // ── Overlay & misc
-@overlay:           rgba(5, 8, 6, 0.72);
-@quick-action-bg:   #202725;
-@quick-action-border: #3a4742;
-@quick-action-text: #c8d8ce;
+@overlay:           rgba(32, 30, 29, 0.5);
+@icon-muted:        @text-muted;
+
+// ── Chart / data-viz accents (kept in sync with app/chart-colors.ts —
+//    Chart.js configs are plain TypeScript and can't consume LESS
+//    variables, so these hex values are deliberately duplicated there;
+//    if you change one here, update chart-colors.ts too)
+@chart-info:         #9b9797;   // neutral-500 — less-emphasized series
+@chart-warning:      @accent-active;   // owed share, dues paid
+@chart-muted-slice:  #d7d3d3;   // neutral-300 — muted doughnut "missed" slice
+// Chart legend/tick labels and ghost-button/quick-action text all share
+// @text-soft — one light-text tone instead of several near-duplicates.
 
 // ── Material CSS variable mappings (used in styles.less overrides)
-@mat-outline-color:       @border-base;
+@mat-outline-color:       @border-strong;
 @mat-outline-focus-color: @accent;
 @mat-label-color:         @text-muted;
-@mat-label-focus-color:   @accent;
+@mat-label-focus-color:   @accent-active;
 @mat-input-text-color:    @text-main;
 @mat-select-arrow-color:  @text-muted;
 @mat-panel-bg:            @bg-card;
-@mat-option-hover-bg:     rgba(74, 222, 128, 0.08);
-@mat-option-selected-bg:  rgba(74, 222, 128, 0.14);
+@mat-option-hover-bg:     fade(@accent, 8%);
+@mat-option-selected-bg:  fade(@accent, 14%);
 @mat-btn-primary-bg:      @accent;
 @mat-btn-primary-text:    @bg-page;

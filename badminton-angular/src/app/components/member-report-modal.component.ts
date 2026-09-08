@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, DoCheck, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { Chart } from 'chart.js/auto';
+import { CHART_COLORS } from '../chart-colors';
 import { MemberReport } from '../models';
 import { TrackerStoreService } from '../state/tracker-store.service';
 
@@ -66,15 +67,15 @@ export class MemberReportModalComponent implements AfterViewInit, DoCheck, OnDes
         datasets: [
           {
             data: [this.report.sessionsAttended, missedSessions],
-            backgroundColor: ['#4ade80', '#33403a'],
-            borderColor: ['#4ade80', '#33403a']
+            backgroundColor: [CHART_COLORS.accent, CHART_COLORS.mutedSlice],
+            borderColor: [CHART_COLORS.accent, CHART_COLORS.mutedSlice]
           }
         ]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: { labels: { color: '#c8d8ce' } }
+          legend: { labels: { color: CHART_COLORS.legendText } }
         }
       }
     });
@@ -93,8 +94,8 @@ export class MemberReportModalComponent implements AfterViewInit, DoCheck, OnDes
             label: 'Payments Made Including Dues (Rs)',
             data: paymentValues,
             backgroundColor: this.report.payments.length
-              ? this.report.payments.map(payment => (payment.kind === 'dues' ? '#f59e0b' : '#60a5fa'))
-              : ['#60a5fa'],
+              ? this.report.payments.map(payment => (payment.kind === 'dues' ? CHART_COLORS.warning : CHART_COLORS.info))
+              : [CHART_COLORS.info],
             borderRadius: 6
           }
         ]
@@ -102,11 +103,11 @@ export class MemberReportModalComponent implements AfterViewInit, DoCheck, OnDes
       options: {
         responsive: true,
         plugins: {
-          legend: { labels: { color: '#c8d8ce' } }
+          legend: { labels: { color: CHART_COLORS.legendText } }
         },
         scales: {
-          x: { ticks: { color: '#9bb0a2' }, grid: { color: '#2a332e' } },
-          y: { ticks: { color: '#9bb0a2' }, grid: { color: '#2a332e' } }
+          x: { ticks: { color: CHART_COLORS.textNeutral }, grid: { color: CHART_COLORS.border } },
+          y: { ticks: { color: CHART_COLORS.textNeutral }, grid: { color: CHART_COLORS.border } }
         }
       }
     });
