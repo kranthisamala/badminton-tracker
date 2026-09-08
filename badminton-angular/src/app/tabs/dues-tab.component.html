@@ -1,4 +1,4 @@
-<section class="state-card">
+<section class="state-card" *ngIf="store.canEdit">
   <h2 class="section-title">Record Dues Payment</h2>
 
   <div class="tab-form-grid">
@@ -52,8 +52,10 @@
         <div class="session-cost">
           <strong>Rs {{ payment.amount | number:'1.0-0' }}</strong>
           <span>{{ store.formatDate(payment.date) }}</span>
-          <button mat-stroked-button (click)="store.editDuesPayment(payment)">Edit</button>
-          <button mat-stroked-button color="warn" (click)="store.deleteDuesPayment(payment.id)">Delete</button>
+          <ng-container *ngIf="store.canEdit">
+            <button mat-stroked-button (click)="store.editDuesPayment(payment)">Edit</button>
+            <button mat-stroked-button color="warn" (click)="store.deleteDuesPayment(payment.id)">Delete</button>
+          </ng-container>
         </div>
       </div>
     </article>

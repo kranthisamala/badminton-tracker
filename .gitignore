@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Firebase Admin SDK service account key(s) -- grant full project access,
+# never commit. See scripts/provision-member-accounts.js.
+serviceAccountKey*.json
+*-firebase-adminsdk-*.json

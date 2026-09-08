@@ -2,19 +2,26 @@
   <h2 class="section-title">Current Members ({{ store.data?.members?.length || 0 }})</h2>
   <div class="chip-grid" *ngIf="store.data?.members?.length; else noMembers">
     <div class="chip" *ngFor="let member of store.data?.members">
-      <span>{{ member.name }}</span>
+      <span>{{ member.name }} <small>&#64;{{ member.username }}</small></span>
       <div class="chip-actions">
         <button mat-stroked-button (click)="openMemberReport(member.id)">Report</button>
-        <button mat-stroked-button (click)="store.renameMember(member.id)">Rename</button>
-        <button mat-stroked-button color="warn" (click)="store.removeMember(member.id)">Remove</button>
+        <ng-container *ngIf="store.canEdit">
+          <button mat-stroked-button (click)="store.renameMember(member.id)">Rename</button>
+          <button mat-stroked-button color="warn" (click)="store.removeMember(member.id)">Remove</button>
+        </ng-container>
       </div>
     </div>
   </div>
   <ng-template #noMembers><p>No members available.</p></ng-template>
 </section>
 
-<section class="state-card">
+<section class="state-card" *ngIf="store.canEdit">
   <h2 class="section-title">Add New Member</h2>
+  <p class="dashboard-subtitle">
+    A login username is generated automatically from the name. To actually
+    provision their login account, re-run the account provisioning script
+    (see README).
+  </p>
   <div class="tab-form-grid">
     <mat-form-field appearance="outline" class="tab-field">
       <mat-label>Name</mat-label>

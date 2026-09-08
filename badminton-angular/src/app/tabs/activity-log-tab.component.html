@@ -1,0 +1,22 @@
+<section class="state-card">
+  <h2 class="section-title">Activity Log ({{ entries.length }})</h2>
+  <div class="table-wrap" *ngIf="entries.length; else noEntries">
+    <table>
+      <thead>
+        <tr>
+          <th>When</th>
+          <th>Who</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entry of entries">
+          <td>{{ formatTimestamp(entry.timestamp) }}</td>
+          <td>{{ entry.username }}</td>
+          <td>{{ entry.action }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ng-template #noEntries><p>No activity recorded yet.</p></ng-template>
+</section>

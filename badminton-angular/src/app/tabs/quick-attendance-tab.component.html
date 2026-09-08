@@ -20,15 +20,17 @@
     <mat-chip-grid #chipGrid aria-label="Session members">
       <mat-chip
         *ngFor="let memberId of store.quickSessionAttendees"
+        [removable]="store.canEdit"
         (removed)="removeFromSession(memberId)"
         class="member-chip">
         {{ store.memberName(memberId) }}
-        <button matChipRemove aria-label="Remove">×</button>
+        <button *ngIf="store.canEdit" matChipRemove aria-label="Remove">×</button>
       </mat-chip>
     </mat-chip-grid>
 
     <!-- Search input -->
     <input
+      *ngIf="store.canEdit"
       #memberInput
       matInput
       [ngModel]="store.quickAttendanceQuery"

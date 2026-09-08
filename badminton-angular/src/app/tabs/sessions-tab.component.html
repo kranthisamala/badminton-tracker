@@ -1,4 +1,4 @@
-<section class="state-card">
+<section class="state-card" *ngIf="store.canEdit">
   <h2 class="section-title">Add New Session</h2>
 
   <div class="tab-form-grid">
@@ -64,8 +64,10 @@
           </div>
           <div class="session-cost">
             <strong>Rs {{ session.cost | number:'1.0-0' }}</strong>
-            <button mat-stroked-button (click)="startEdit(session)">Edit</button>
-            <button mat-stroked-button color="warn" (click)="store.deleteSession(session.id)">Delete</button>
+            <ng-container *ngIf="store.canEdit">
+              <button mat-stroked-button (click)="startEdit(session)">Edit</button>
+              <button mat-stroked-button color="warn" (click)="store.deleteSession(session.id)">Delete</button>
+            </ng-container>
           </div>
         </div>
         <div class="payment-line" *ngFor="let payment of session.payments">

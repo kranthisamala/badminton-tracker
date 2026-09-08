@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { AuthService } from '../auth.service';
 import { DuesPayment, Member, MemberReport, MemberSummary, Payment, Session, TrackerData } from '../models';
 import { TrackerDataService } from '../tracker-data.service';
 
@@ -30,7 +31,23 @@ export class TrackerStoreService {
 
   pendingDrilldownMemberId: number | null = null;
 
-  constructor(private readonly trackerDataService: TrackerDataService) {}
+  constructor(
+    private readonly trackerDataService: TrackerDataService,
+    private readonly authService: AuthService
+  ) {}
+
+  get canEdit(): boolean {
+    return this.authService.canEdit;
+  }
+
+  reset(): void {
+    this.data = null;
+    this.summary = [];
+    this.totalSessions = 0;
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
 
   init(): void {
     this.trackerDataService.loadData().subscribe({
@@ -42,7 +59,7 @@ export class TrackerStoreService {
       },
       error: () => {
         this.loading = false;
-        this.errorMessage = 'Unable to load data from server. Ensure python server is running on localhost:5000.';
+        this.errorMessage = 'Unable to load data from Firestore. Check your Firebase config and that trackerData/main has been seeded.';
       }
     });
   }
@@ -414,11 +431,25 @@ export class TrackerStoreService {
 
     const id = this.data.nextMemberId;
     this.data.nextMemberId += 1;
-    this.data.members.push({ id, name });
+    const username = this.generateUsername(name);
+    this.data.members.push({ id, name, username });
     this.newMemberName = '';
     this.initializeUiDefaults();
     this.recomputeDerivedState();
     this.persistData(name + ' added.');
+  }
+
+  private generateUsername(name: string): string {
+    const taken = new Set((this.data?.members || []).map(m => m.username));
+    let base = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'member';
+    while (base.length < 6) base += '0';
+    let candidate = base;
+    let n = 2;
+    while (taken.has(candidate)) {
+      candidate = base + n;
+      n++;
+    }
+    return candidate;
   }
 
   removeMember(memberId: number): void {
@@ -572,9 +603,12 @@ export class TrackerStoreService {
     this.trackerDataService.saveData(this.data).subscribe({
       next: () => {
         this.successMessage = successMessage;
+        const uid = this.authService.user?.uid || 'unknown';
+        const username = this.authService.username || 'unknown';
+        this.trackerDataService.logAction(successMessage, uid, username).subscribe({ error: () => {} });
       },
       error: () => {
-        this.errorMessage = 'Failed to save changes. Please ensure backend server is running.';
+        this.errorMessage = 'Failed to save changes to Firestore. Check your connection and Firebase config.';
       }
     });
   }

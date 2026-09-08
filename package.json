@@ -1,13 +1,14 @@
 {
-  "name": "badminton-tracker-backend",
+  "name": "badminton-tracker",
   "version": "1.0.0",
   "private": true,
-  "description": "Node.js backend for Badminton Tracker",
-  "main": "server.js",
+  "description": "Badminton Tracker (Angular app backed by Firebase Firestore)",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node scripts/start-all.js",
-    "dev:api": "node server.js",
-    "dev:web": "npm --prefix badminton-angular start"
+    "dev": "npm --prefix badminton-angular start",
+    "provision-accounts": "node scripts/provision-member-accounts.js",
+    "seed-firestore": "node scripts/push-data-to-firestore.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
   }
 }

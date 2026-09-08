@@ -18,7 +18,7 @@
         </button>
         <div class="card-menu" *ngIf="actionMenuMemberId === player.id">
           <button type="button" (click)="openMemberReport(player.id)">View Report</button>
-          <button type="button" *ngIf="isOwing(player.balance)" (click)="openQuickDuesFromMenu(player.id)">Record Dues</button>
+          <button type="button" *ngIf="store.canEdit && isOwing(player.balance)" (click)="openQuickDuesFromMenu(player.id)">Record Dues</button>
         </div>
       </div>
     </div>

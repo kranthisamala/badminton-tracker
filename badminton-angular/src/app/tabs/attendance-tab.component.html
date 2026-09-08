@@ -12,7 +12,7 @@
         <tr *ngFor="let member of store.data?.members">
           <td>{{ member.name }}</td>
           <td *ngFor="let session of store.sortedSessions">
-            <button class="att-btn" [class.present]="store.isPresent(session.id, member.id)" (click)="store.toggleAttendance(session.id, member.id)">
+            <button class="att-btn" [class.present]="store.isPresent(session.id, member.id)" [disabled]="!store.canEdit" (click)="store.toggleAttendance(session.id, member.id)">
               {{ store.isPresent(session.id, member.id) ? '✓' : '' }}
             </button>
           </td>

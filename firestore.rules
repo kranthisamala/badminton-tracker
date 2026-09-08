@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function role() {
+      return get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role;
+    }
+    function isOwner() { return request.auth != null && role() == 'owner'; }
+    function canEdit() { return request.auth != null && (role() == 'editor' || role() == 'owner'); }
+
+    match /trackerData/{docId} {
+      allow read: if request.auth != null;
+      allow write: if canEdit();
+    }
+
+    match /auditLog/{entryId} {
+      allow read: if request.auth != null;
+      allow create: if canEdit();
+      allow update, delete: if false;
+    }
+
+    // username -> {memberId, uid} lookup used by the login screen before the
+    // user is authenticated. Contains no secrets. Only ever written by the
+    // Admin SDK provisioning script (bypasses rules entirely), never by the
+    // client app.
+    match /usernames/{username} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Accounts are provisioned only via scripts/provision-member-accounts.js
+    // (Admin SDK, bypasses these rules). From the client:
+    //  - anyone signed in can read (Access tab, Activity Log author lookups)
+    //  - the owner can change anyone's `role` (promote/demote)
+    //  - a signed-in user can update their OWN doc, but only to clear
+    //    mustChangePassword / set contactEmail after first login — never to
+    //    change their own role, username, or memberId
+    match /roles/{uid} {
+      allow read: if request.auth != null;
+      allow create, delete: if false;
+      allow update: if isOwner()
+        || (request.auth != null
+            && request.auth.uid == uid
+            && request.resource.data.role == resource.data.role
+            && request.resource.data.username == resource.data.username
+            && request.resource.data.memberId == resource.data.memberId);
+    }
+  }
+}

@@ -1,40 +1,63 @@
 <main class="page">
   <header class="page-header">
     <h1>Badminton Tracker</h1>
-    <!-- <p>Feature migration in progress</p> -->
   </header>
 
-  <nav class="tabs" *ngIf="!store.loading && !store.errorMessage">
-    <button class="tab" [class.active]="activeTab === 'summary'" (click)="selectTab('summary')">Summary</button>
-    <button class="tab" [class.active]="activeTab === 'dashboard'" (click)="selectTab('dashboard')">Dashboard</button>
-    <button class="tab" [class.active]="activeTab === 'quick-attendance'" (click)="selectTab('quick-attendance')">Quick Attendance</button>
-    <button class="tab" [class.active]="activeTab === 'attendance'" (click)="selectTab('attendance')">Attendance</button>
-    <button class="tab" [class.active]="activeTab === 'sessions'" (click)="selectTab('sessions')">Sessions</button>
-    <button class="tab" [class.active]="activeTab === 'dues'" (click)="selectTab('dues')">Dues</button>
-    <button class="tab" [class.active]="activeTab === 'members'" (click)="selectTab('members')">Members</button>
-  </nav>
+  <app-login *ngIf="!auth.user"></app-login>
 
-  <section *ngIf="store.loading" class="state-card">
-    <p>Loading data...</p>
-  </section>
+  <app-change-password *ngIf="auth.user && auth.mustChangePassword"></app-change-password>
 
-  <section class="toast-stack no-print" *ngIf="!store.loading && (store.errorMessage || store.successMessage)">
-    <article class="toast toast-error" *ngIf="store.errorMessage" role="status" aria-live="polite">
-      <p>{{ store.errorMessage }}</p>
-      <button class="ghost-btn toast-close" (click)="dismissError()" aria-label="Dismiss error notification">×</button>
-    </article>
+  <ng-container *ngIf="auth.user && !auth.mustChangePassword">
+    <div class="account-bar no-print">
+      <span>{{ auth.username || auth.user.uid }} · {{ auth.role || 'pending role' }}</span>
+      <button class="ghost-btn" type="button" (click)="signOut()">Sign out</button>
+    </div>
 
-    <article class="toast toast-success" *ngIf="store.successMessage" role="status" aria-live="polite">
-      <p>{{ store.successMessage }}</p>
-      <button class="ghost-btn toast-close" (click)="dismissSuccess()" aria-label="Dismiss success notification">×</button>
-    </article>
-  </section>
+    <p class="view-only-banner no-print" *ngIf="!auth.role">
+      Your account is set up but hasn't been assigned a role yet. Check back
+      shortly, or ask the owner to grant you access.
+    </p>
 
-  <app-summary-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'summary'"></app-summary-tab>
-  <app-dashboard-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dashboard'" (drilldown)="onDashboardDrilldown($event)"></app-dashboard-tab>
-  <app-quick-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'quick-attendance'"></app-quick-attendance-tab>
-  <app-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'attendance'"></app-attendance-tab>
-  <app-sessions-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'sessions'"></app-sessions-tab>
-  <app-dues-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dues'"></app-dues-tab>
-  <app-members-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'members'"></app-members-tab>
+    <p class="view-only-banner no-print" *ngIf="auth.role === 'viewer'">
+      View only — you can see everything, but only an editor can make changes.
+    </p>
+
+    <nav class="tabs" *ngIf="!store.loading && !store.errorMessage">
+      <button class="tab" [class.active]="activeTab === 'summary'" (click)="selectTab('summary')">Summary</button>
+      <button class="tab" [class.active]="activeTab === 'dashboard'" (click)="selectTab('dashboard')">Dashboard</button>
+      <button class="tab" [class.active]="activeTab === 'quick-attendance'" (click)="selectTab('quick-attendance')">Quick Attendance</button>
+      <button class="tab" [class.active]="activeTab === 'attendance'" (click)="selectTab('attendance')">Attendance</button>
+      <button class="tab" [class.active]="activeTab === 'sessions'" (click)="selectTab('sessions')">Sessions</button>
+      <button class="tab" [class.active]="activeTab === 'dues'" (click)="selectTab('dues')">Dues</button>
+      <button class="tab" [class.active]="activeTab === 'members'" (click)="selectTab('members')">Members</button>
+      <button class="tab" [class.active]="activeTab === 'activity'" (click)="selectTab('activity')">Activity Log</button>
+      <button class="tab" *ngIf="auth.isOwner" [class.active]="activeTab === 'access'" (click)="selectTab('access')">Access</button>
+    </nav>
+
+    <section *ngIf="store.loading" class="state-card">
+      <p>Loading data...</p>
+    </section>
+
+    <section class="toast-stack no-print" *ngIf="!store.loading && (store.errorMessage || store.successMessage)">
+      <article class="toast toast-error" *ngIf="store.errorMessage" role="status" aria-live="polite">
+        <p>{{ store.errorMessage }}</p>
+        <button class="ghost-btn toast-close" (click)="dismissError()" aria-label="Dismiss error notification">×</button>
+      </article>
+
+      <article class="toast toast-success" *ngIf="store.successMessage" role="status" aria-live="polite">
+        <p>{{ store.successMessage }}</p>
+        <button class="ghost-btn toast-close" (click)="dismissSuccess()" aria-label="Dismiss success notification">×</button>
+      </article>
+    </section>
+
+    <app-summary-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'summary'"></app-summary-tab>
+    <app-dashboard-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dashboard'" (drilldown)="onDashboardDrilldown($event)"></app-dashboard-tab>
+    <app-quick-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'quick-attendance'"></app-quick-attendance-tab>
+    <app-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'attendance'"></app-attendance-tab>
+    <app-sessions-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'sessions'"></app-sessions-tab>
+    <app-dues-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dues'"></app-dues-tab>
+    <app-members-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'members'"></app-members-tab>
+    <app-activity-log-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'activity'"></app-activity-log-tab>
+    <app-access-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'access' && auth.isOwner"></app-access-tab>
+  </ng-container>
 </main>
