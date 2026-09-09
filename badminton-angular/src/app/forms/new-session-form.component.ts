@@ -11,6 +11,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipsModule } from '@angular/material/chips';
 import { TrackerStoreService } from '../state/tracker-store.service';
+import { formatTimeRangeLabel } from '../time-format';
 
 @Component({
   selector: 'app-new-session-form',
@@ -38,12 +39,18 @@ export class NewSessionFormComponent implements AfterViewInit {
   @ViewChild('memberChipWrapper') memberChipWrapper?: ElementRef<HTMLDivElement>;
 
   memberPickerWidth = 500;
-  sessionDateValue: Date | null = null;
+  // Defaults to today so a new session doesn't require picking a date at
+  // all in the common case of logging one right after it happens.
+  sessionDateValue: Date | null = new Date();
+  sessionStartTimeValue = '';
+  sessionEndTimeValue = '';
 
   constructor(
     public readonly store: TrackerStoreService,
     private readonly cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    this.onDateSelected(this.sessionDateValue);
+  }
 
   ngAfterViewInit(): void {
     if (this.memberChipWrapper) {
@@ -54,6 +61,10 @@ export class NewSessionFormComponent implements AfterViewInit {
 
   onDateSelected(date: Date | null): void {
     this.store.newSessionDate = date ? this.formatDateLabel(date) : '';
+  }
+
+  onSessionTimeChange(): void {
+    this.store.newSessionTime = formatTimeRangeLabel(this.sessionStartTimeValue, this.sessionEndTimeValue);
   }
 
   onPlayerSelected(event: MatAutocompleteSelectedEvent): void {

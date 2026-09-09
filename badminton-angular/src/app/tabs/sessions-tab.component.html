@@ -112,8 +112,13 @@
       <input matInput type="text" [(ngModel)]="editDate" placeholder="e.g. 17th July" />
     </mat-form-field>
     <mat-form-field appearance="outline" class="tab-field">
-      <mat-label>Time</mat-label>
-      <input matInput type="text" [(ngModel)]="editTime" placeholder="e.g. 7:00 – 9:00 PM" />
+      <mat-label>Start time</mat-label>
+      <input matInput type="time" [(ngModel)]="editStartTimeValue" (ngModelChange)="onEditTimeChange()" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>End time</mat-label>
+      <input matInput type="time" [(ngModel)]="editEndTimeValue" (ngModelChange)="onEditTimeChange()" />
+      <mat-hint *ngIf="editTime">{{ editTime }}</mat-hint>
     </mat-form-field>
     <mat-form-field appearance="outline" class="tab-field">
       <mat-label>Venue / court</mat-label>

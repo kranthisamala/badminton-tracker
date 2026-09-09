@@ -9,6 +9,7 @@ import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/ma
 import { MatChipsModule } from '@angular/material/chips';
 import { Member, Session } from '../models';
 import { TrackerStoreService } from '../state/tracker-store.service';
+import { formatTimeRangeLabel, parseTimeRangeToInputValues } from '../time-format';
 
 @Component({
   selector: 'app-sessions-tab',
@@ -42,6 +43,8 @@ export class SessionsTabComponent implements AfterViewInit {
   editPayments: { memberId: number; amount: number }[] = [];
   editAttendees: number[] = [];
   editMemberQuery = '';
+  editStartTimeValue = '';
+  editEndTimeValue = '';
 
   constructor(
     public readonly store: TrackerStoreService,
@@ -93,6 +96,10 @@ export class SessionsTabComponent implements AfterViewInit {
     this.editAttendees = this.editAttendees.filter(id => id !== memberId);
   }
 
+  onEditTimeChange(): void {
+    this.editTime = formatTimeRangeLabel(this.editStartTimeValue, this.editEndTimeValue);
+  }
+
   onEditMemberSelected(event: MatAutocompleteSelectedEvent): void {
     this.addEditAttendee(Number(event.option.value));
     if (this.editMemberInputEl) this.editMemberInputEl.nativeElement.value = '';
@@ -109,6 +116,9 @@ export class SessionsTabComponent implements AfterViewInit {
     this.editDate = session.date;
     this.editNotes = session.notes || '';
     this.editTime = session.time || '';
+    const parsedTime = parseTimeRangeToInputValues(this.editTime);
+    this.editStartTimeValue = parsedTime.start;
+    this.editEndTimeValue = parsedTime.end;
     this.editVenue = session.venue || '';
     this.editCourtFee = session.courtFee ?? null;
     this.editShuttleCount = session.shuttleCount ?? null;

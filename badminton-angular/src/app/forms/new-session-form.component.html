@@ -19,8 +19,14 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="tab-field">
-        <mat-label>Time</mat-label>
-        <input matInput type="text" [(ngModel)]="store.newSessionTime" placeholder="e.g. 7:00 – 9:00 PM" />
+        <mat-label>Start time</mat-label>
+        <input matInput type="time" [(ngModel)]="sessionStartTimeValue" (ngModelChange)="onSessionTimeChange()" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>End time</mat-label>
+        <input matInput type="time" [(ngModel)]="sessionEndTimeValue" (ngModelChange)="onSessionTimeChange()" />
+        <mat-hint *ngIf="store.newSessionTime">{{ store.newSessionTime }}</mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="tab-field">
