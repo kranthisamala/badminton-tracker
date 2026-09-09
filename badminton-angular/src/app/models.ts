@@ -59,6 +59,12 @@ export interface MemberPaymentRecord {
   label: string;
 }
 
+export interface Settlement {
+  fromId: number;
+  toId: number;
+  amount: number;
+}
+
 export interface MemberReport {
   id: number;
   name: string;

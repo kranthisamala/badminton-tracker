@@ -1,22 +1,41 @@
-<section class="state-card login-card">
-  <h2 class="section-title">Sign in</h2>
-
-  <div class="tab-form-grid">
-    <mat-form-field appearance="outline" class="tab-field">
-      <mat-label>Username</mat-label>
-      <input matInput type="text" [(ngModel)]="username" autocomplete="username" (keydown.enter)="submit()" />
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="tab-field">
-      <mat-label>Password</mat-label>
-      <input matInput type="password" [(ngModel)]="password" autocomplete="current-password" (keydown.enter)="submit()" />
-    </mat-form-field>
+<div class="login-split">
+  <div class="login-poster">
+    <div class="login-poster-brand">
+      <span class="brand-icon">🏸</span>
+      <div class="login-poster-brand-name">BADMINTON<br />TRACKER</div>
+    </div>
+    <h2 class="login-poster-headline">Who played. What it cost. Who still owes.</h2>
+    <p class="login-poster-copy">
+      Attendance, sessions, and dues — one shared ledger everyone in the
+      group can see, kept in sync in real time.
+    </p>
   </div>
 
-  <p class="view-only-banner" *ngIf="auth.errorMessage">{{ auth.errorMessage }}</p>
+  <div class="login-form-panel">
+    <section class="state-card login-card">
+      <h2 class="section-title">Sign in</h2>
+      <p class="dashboard-subtitle">Use the username the owner set up for you.</p>
 
-  <div class="actions-row">
-    <button mat-flat-button color="primary" type="button" [disabled]="submitting" (click)="submit()">
-      Sign in
-    </button>
+      <div class="tab-form-grid">
+        <mat-form-field appearance="outline" class="tab-field">
+          <mat-label>Username</mat-label>
+          <input matInput type="text" [(ngModel)]="username" autocomplete="username" (keydown.enter)="submit()" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="tab-field">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" [(ngModel)]="password" autocomplete="current-password" (keydown.enter)="submit()" />
+        </mat-form-field>
+      </div>
+
+      <p class="view-only-banner" *ngIf="auth.errorMessage">{{ auth.errorMessage }}</p>
+
+      <div class="actions-row">
+        <button mat-flat-button color="primary" type="button" [disabled]="submitting" (click)="submit()">
+          Sign in
+        </button>
+      </div>
+
+      <p class="login-footnote">No account? Only the group owner can add members — ask them to set up your login.</p>
+    </section>
   </div>
-</section>
+</div>

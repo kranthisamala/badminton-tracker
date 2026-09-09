@@ -109,6 +109,212 @@ html {
   font-size: 0.95rem;
 }
 
+// ── App shell: persistent left sidebar (desktop) / bottom nav (mobile) ──
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: @bg-page;
+  color: @text-main;
+}
+
+.sidebar {
+  width: 222px;
+  flex: 0 0 auto;
+  background: @bg-card;
+  border-right: 2px solid @border-strong;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px;
+  border-bottom: 2px solid @border-strong;
+}
+
+.sidebar-brand-name {
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.sidebar-brand-name span {
+  color: @accent;
+}
+
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.side-nav-item {
+  text-align: left;
+  border: none;
+  border-left: 4px solid transparent;
+  background: transparent;
+  color: @text-muted;
+  padding: 11px 18px;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.side-nav-item:hover {
+  background: fade(@ink, 5%);
+  color: @text-main;
+}
+
+.side-nav-item.active {
+  background: @ink;
+  color: @bg-page;
+  border-left-color: @accent;
+  font-weight: 700;
+}
+
+.sidebar-account {
+  border-top: 2px solid @border-strong;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-account .ghost-btn {
+  width: 100%;
+  text-align: center;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 32px 90px;
+}
+
+.content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid @border-strong;
+  flex-wrap: wrap;
+}
+
+.content-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.bottom-nav {
+  display: none;
+}
+
+.more-sheet {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    padding: 16px 16px 90px;
+  }
+
+  .content-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: @bg-card;
+    border-top: 2px solid @border-strong;
+    z-index: 500;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .bottom-nav-item {
+    flex: 1;
+    border: none;
+    border-top: 3px solid transparent;
+    background: transparent;
+    color: @text-muted;
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 9px 4px;
+    min-height: 48px;
+    cursor: pointer;
+  }
+
+  .bottom-nav-item.active {
+    color: @accent-active;
+    border-top-color: @accent;
+  }
+
+  .more-sheet {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    align-items: flex-end;
+    background: @overlay;
+    z-index: 600;
+  }
+
+  .more-sheet-panel {
+    width: 100%;
+    background: @bg-card;
+    border-top: 2px solid @border-strong;
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .more-sheet-item {
+    text-align: left;
+    border: none;
+    background: transparent;
+    color: @text-main;
+    padding: 14px 12px;
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 48px;
+  }
+
+  .more-sheet-item.active {
+    color: @accent-active;
+  }
+
+  .more-sheet-item:hover {
+    background: fade(@ink, 5%);
+  }
+}
+
 // ── Sign-in / first-run password screens ──
 .auth-shell {
   min-height: calc(100vh - 220px);
@@ -118,9 +324,107 @@ html {
   padding: 24px 0;
 }
 
+// ── Full-bleed split login screen ──
+.login-split {
+  display: flex;
+  min-height: 100vh;
+  background: @bg-page;
+  font-family: 'Archivo', system-ui, sans-serif;
+}
+
+.login-poster {
+  flex: 1.15;
+  background: @accent;
+  color: @bg-page;
+  padding: 44px 46px;
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid @border-strong;
+}
+
+.login-poster-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-poster-brand .brand-icon {
+  background: @ink;
+  border-color: fade(@bg-page, 40%);
+}
+
+.login-poster-brand-name {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.login-poster-headline {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  margin: auto 0 0;
+  max-width: 16ch;
+  color: @bg-page;
+}
+
+.login-poster-copy {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 20px 0 0;
+  max-width: 42ch;
+  color: @bg-page;
+  opacity: 0.92;
+}
+
+.login-form-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+}
+
+.login-footnote {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 2px solid @border-strong;
+  font-size: 0.82rem;
+  color: @text-muted;
+  line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+  .login-split {
+    flex-direction: column;
+  }
+
+  .login-poster {
+    border-right: none;
+    border-bottom: 2px solid @border-strong;
+    padding: 26px 20px 30px;
+  }
+
+  .login-poster-headline {
+    font-size: 1.9rem;
+    margin-top: 30px;
+  }
+
+  .login-poster-copy {
+    display: none;
+  }
+
+  .login-form-panel {
+    padding: 26px 20px;
+  }
+}
+
 .login-card {
   width: min(420px, 100%);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
 }
 
 .login-card .section-title {
@@ -754,6 +1058,63 @@ button.balance:focus-visible {
   color: @text-muted;
 }
 
+.dues-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .dues-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settlements-panel {
+  border-left: 2px solid @border-strong;
+  padding-left: 20px;
+}
+
+@media (max-width: 860px) {
+  .settlements-panel {
+    border-left: none;
+    border-top: 2px solid @border-strong;
+    padding-left: 0;
+    padding-top: 16px;
+  }
+}
+
+.settlement-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.settlement-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid @border-base;
+  font-size: 0.88rem;
+}
+
+.settlement-row:last-child {
+  border-bottom: none;
+}
+
+.settlement-arrow {
+  color: @accent;
+  font-weight: 700;
+}
+
+.settlement-amount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
 .table-wrap {
   overflow-x: auto;
 
@@ -978,7 +1339,8 @@ button.balance:focus-visible {
 }
 
 .receive-text {
-  color: @accent !important;
+  color: @ink !important;
+  font-weight: 700;
 }
 
 .owe-text {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,7 +23,7 @@ import { TrackerStoreService } from '../state/tracker-store.service';
   ],
   templateUrl: './summary-tab.component.html'
 })
-export class SummaryTabComponent {
+export class SummaryTabComponent implements OnInit {
   @ViewChild('quickAmountInput') quickAmountInput?: ElementRef<HTMLInputElement>;
 
   showQuickDuesModal = false;
@@ -33,6 +33,13 @@ export class SummaryTabComponent {
   actionMenuMemberId: number | null = null;
 
   constructor(public readonly store: TrackerStoreService) {}
+
+  ngOnInit(): void {
+    if (this.store.pendingQuickDuesOpen) {
+      this.store.pendingQuickDuesOpen = false;
+      setTimeout(() => this.recordDuesFor(this.store.duesFrom), 0);
+    }
+  }
 
   recordDuesFor(memberId: number): void {
     this.store.prepareQuickDuesFor(memberId);

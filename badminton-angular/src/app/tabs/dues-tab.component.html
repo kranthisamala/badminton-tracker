@@ -1,3 +1,50 @@
+<section class="state-card">
+  <h2 class="section-title">Dues &amp; Balances</h2>
+  <div class="dues-layout">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Attended</th>
+            <th>Share Owed</th>
+            <th>Session Paid</th>
+            <th>Dues Paid</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of balanceRows">
+            <td>{{ row.name }}</td>
+            <td>{{ row.attended }}</td>
+            <td>Rs {{ row.owed | number:'1.0-0' }}</td>
+            <td>Rs {{ row.paid | number:'1.0-0' }}</td>
+            <td>Rs {{ row.duesPaid | number:'1.0-0' }}</td>
+            <td [class.owe-text]="row.balance < -0.5" [class.receive-text]="row.balance > 0.5">
+              {{ row.balance > 0.5 ? '+' : '' }}Rs {{ row.balance | number:'1.0-0' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="settlements-panel">
+      <h3 class="section-title">Suggested Settlements</h3>
+      <p class="dashboard-subtitle">Fewest transfers to settle everyone up.</p>
+      <div class="settlement-list" *ngIf="settlements.length; else noSettlements">
+        <div class="settlement-row" *ngFor="let s of settlements">
+          <span>{{ store.memberName(s.fromId) }} <span class="settlement-arrow">&rarr;</span> {{ store.memberName(s.toId) }}</span>
+          <span class="settlement-amount">
+            <strong>Rs {{ s.amount | number:'1.0-0' }}</strong>
+            <button *ngIf="store.canEdit" mat-stroked-button (click)="recordSettlement(s)">Use</button>
+          </span>
+        </div>
+      </div>
+      <ng-template #noSettlements><p>Everyone's settled up.</p></ng-template>
+    </div>
+  </div>
+</section>
+
 <section class="state-card" *ngIf="store.canEdit">
   <h2 class="section-title">Record Dues Payment</h2>
 

@@ -1,0 +1,79 @@
+<ng-container *ngIf="report; else noMember">
+  <section class="state-card">
+    <h2 class="section-title">Hey {{ report.name }}</h2>
+    <p class="dashboard-subtitle">Here's where you stand with the group.</p>
+
+    <p class="balance receive" *ngIf="isReceiving(report.netBalance)">
+      Rs {{ report.netBalance | number:'1.0-0' }} to receive
+    </p>
+    <p class="balance owe" *ngIf="isOwing(report.netBalance)">
+      Owes Rs {{ (report.netBalance * -1) | number:'1.0-0' }}
+    </p>
+    <p class="balance settled" *ngIf="isSettled(report.netBalance)">
+      Settled Up
+    </p>
+  </section>
+
+  <section class="member-report-stats inline-top-12">
+    <article class="state-card compact-stat">
+      <span>Sessions Attended</span>
+      <strong>{{ report.sessionsAttended }} / {{ report.totalSessions }}</strong>
+    </article>
+    <article class="state-card compact-stat">
+      <span>Attendance Rate</span>
+      <strong>{{ report.attendanceRate | number:'1.0-1' }}%</strong>
+    </article>
+    <article class="state-card compact-stat">
+      <span>Total Paid Out</span>
+      <strong>Rs {{ report.totalPaid | number:'1.0-0' }}</strong>
+    </article>
+    <article class="state-card compact-stat">
+      <span>Share Owed</span>
+      <strong>Rs {{ report.totalOwed | number:'1.0-0' }}</strong>
+    </article>
+  </section>
+
+  <section class="report-sections-grid inline-top-12">
+    <article class="state-card">
+      <h3 class="section-title">Recent Sessions ({{ report.attendedSessions.length }})</h3>
+      <div class="session-list" *ngIf="report.attendedSessions.length; else noAttendance">
+        <article class="session-card" *ngFor="let session of report.attendedSessions.slice(0, 6)">
+          <div class="session-head">
+            <div>
+              <h3>{{ store.formatDate(session.date) }}</h3>
+              <p *ngIf="session.notes">{{ session.notes }}</p>
+            </div>
+            <div class="session-cost">
+              <strong>Rs {{ session.cost | number:'1.0-0' }}</strong>
+            </div>
+          </div>
+        </article>
+      </div>
+      <ng-template #noAttendance><p>No sessions attended yet.</p></ng-template>
+    </article>
+
+    <article class="state-card">
+      <h3 class="section-title">Recent Payments ({{ report.payments.length }})</h3>
+      <div class="session-list" *ngIf="report.payments.length; else noPayments">
+        <article class="session-card" *ngFor="let payment of report.payments.slice(-6).reverse()">
+          <div class="session-head">
+            <div>
+              <h3>{{ payment.label }}</h3>
+              <p>{{ store.formatDate(payment.date) }}</p>
+            </div>
+            <div class="session-cost">
+              <strong>Rs {{ payment.amount | number:'1.0-0' }}</strong>
+            </div>
+          </div>
+        </article>
+      </div>
+      <ng-template #noPayments><p>No payments recorded yet.</p></ng-template>
+    </article>
+  </section>
+</ng-container>
+
+<ng-template #noMember>
+  <section class="state-card">
+    <p>We couldn't match your account to a member record yet — ask the owner to check your username.</p>
+  </section>
+</ng-template>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from '../auth.service';
-import { DuesPayment, Member, MemberReport, MemberSummary, Payment, Session, TrackerData } from '../models';
+import { DuesPayment, Member, MemberReport, MemberSummary, Payment, Session, Settlement, TrackerData } from '../models';
 import { TrackerDataService } from '../tracker-data.service';
 
 @Injectable({ providedIn: 'root' })
@@ -30,6 +30,7 @@ export class TrackerStoreService {
   newMemberName = '';
 
   pendingDrilldownMemberId: number | null = null;
+  pendingQuickDuesOpen = false;
 
   constructor(
     private readonly trackerDataService: TrackerDataService,
@@ -38,6 +39,12 @@ export class TrackerStoreService {
 
   get canEdit(): boolean {
     return this.authService.canEdit;
+  }
+
+  get currentMember(): Member | undefined {
+    const username = this.authService.username;
+    if (!username || !this.data) return undefined;
+    return this.data.members.find(member => member.username === username);
   }
 
   reset(): void {
@@ -636,6 +643,41 @@ export class TrackerStoreService {
       this.duesFrom = this.data.members[0].id;
       this.duesTo = this.data.members.find(member => member.id !== this.duesFrom)?.id || this.duesFrom;
     }
+  }
+
+  // Greedy min-cash-flow: repeatedly match the largest creditor with the
+  // largest debtor until everyone's balance is ~0. Read-only suggestion —
+  // recording a payment still goes through saveDuesPayment() same as today.
+  computeSettlements(): Settlement[] {
+    const creditors = this.summary
+      .filter(s => s.balance > 0.5)
+      .map(s => ({ id: s.id, balance: s.balance }))
+      .sort((a, b) => b.balance - a.balance);
+    const debtors = this.summary
+      .filter(s => s.balance < -0.5)
+      .map(s => ({ id: s.id, balance: -s.balance }))
+      .sort((a, b) => b.balance - a.balance);
+
+    const settlements: Settlement[] = [];
+    let ci = 0;
+    let di = 0;
+
+    while (ci < creditors.length && di < debtors.length) {
+      const creditor = creditors[ci];
+      const debtor = debtors[di];
+      const amount = Math.min(creditor.balance, debtor.balance);
+
+      if (amount > 0.5) {
+        settlements.push({ fromId: debtor.id, toId: creditor.id, amount: Math.round(amount) });
+      }
+
+      creditor.balance -= amount;
+      debtor.balance -= amount;
+      if (creditor.balance < 0.5) ci++;
+      if (debtor.balance < 0.5) di++;
+    }
+
+    return settlements;
   }
 
   private calcSummary(data: TrackerData): MemberSummary[] {
