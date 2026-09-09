@@ -12,6 +12,12 @@ export interface Payment {
 // cost is the source of truth for the split. On sessions saved with a cost
 // breakdown it equals courtFee + shuttleCount * shuttlePrice; older sessions
 // have no breakdown and cost is simply what was collected.
+//
+// status is absent on every session created before this field existed —
+// treat missing as 'done'. Only 'in_progress' sessions are excluded from
+// dues/balance calculations (see TrackerStoreService.calcSummary); a player
+// can opt themselves into one via TrackerStoreService.optInSession before it
+// is finalized with markSessionDone.
 export interface Session {
   id: number;
   date: string;
@@ -23,6 +29,7 @@ export interface Session {
   courtFee?: number;
   shuttleCount?: number;
   shuttlePrice?: number;
+  status?: 'in_progress' | 'done';
 }
 
 export interface SessionCostEdit {

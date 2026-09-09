@@ -22,6 +22,10 @@ export class TrackerStoreService {
   newSessionShuttlePrice: number | null = null;
   newSessionAttendees: number[] = [];
   newSessionMemberQuery = '';
+  // When true, addSession() only requires a date — cost, payments and
+  // attendees are all filled in later. See calcSummary(): a session's cost
+  // is excluded from every balance until it's finalized via updateSession().
+  newSessionInProgress = false;
 
   duesEditId: number | null = null;
   duesFrom = 0;
@@ -49,6 +53,32 @@ export class TrackerStoreService {
     return this.authService.canEdit;
   }
 
+  // Group-wide stats for the dashboard's top stat row (mockup 1a) — finalized
+  // sessions only, same rule as everywhere else a session's cost is counted.
+  get doneSessionsCount(): number {
+    return this.data?.sessions.filter(session => session.status !== 'in_progress').length || 0;
+  }
+
+  get totalShuttlesUsed(): number {
+    return (this.data?.sessions || [])
+      .filter(session => session.status !== 'in_progress')
+      .reduce((sum, session) => sum + (session.shuttleCount || 0), 0);
+  }
+
+  get avgShuttlesPerSession(): number {
+    return this.doneSessionsCount ? this.totalShuttlesUsed / this.doneSessionsCount : 0;
+  }
+
+  get totalUnsettled(): number {
+    return this.summary
+      .filter(member => member.balance < -0.5)
+      .reduce((sum, member) => sum + Math.abs(member.balance), 0);
+  }
+
+  get unsettledMemberCount(): number {
+    return this.summary.filter(member => Math.abs(member.balance) > 0.5).length;
+  }
+
   get currentMember(): Member | undefined {
     const username = this.authService.username;
     if (!username || !this.data) return undefined;
@@ -65,6 +95,8 @@ export class TrackerStoreService {
   }
 
   init(): void {
+    this.loading = true;
+    this.errorMessage = '';
     this.trackerDataService.loadData().subscribe({
       next: data => {
         this.data = data;
@@ -77,6 +109,13 @@ export class TrackerStoreService {
         this.errorMessage = 'Unable to load data from Firestore. Check your Firebase config and that trackerData/main has been seeded.';
       }
     });
+  }
+
+  // Manual fallback for the rare case where even the automatic retry inside
+  // TrackerDataService.loadData() is exhausted (e.g. a genuinely slow
+  // connection) — re-attaches a fresh listener without needing a page reload.
+  retryLoad(): void {
+    this.init();
   }
 
   clearMessages(): void {
@@ -138,7 +177,69 @@ export class TrackerStoreService {
 
   get lastSession(): Session | null {
     if (!this.data?.sessions.length) return null;
-    return this.sortedSessions[0];
+    return this.sortedSessions.find(session => session.status !== 'in_progress') || null;
+  }
+
+  // Sessions that have been started but not finalized — their cost is not
+  // yet in anyone's balance (see calcSummary). Newest first.
+  get inProgressSessions(): Session[] {
+    return this.sortedSessions.filter(session => session.status === 'in_progress');
+  }
+
+  get nextSession(): Session | null {
+    return this.inProgressSessions[0] || null;
+  }
+
+  attendeeMembers(sessionId: number): Member[] {
+    if (!this.data) return [];
+    return (this.data.attendance[String(sessionId)] || [])
+      .map(id => this.memberById(id))
+      .filter((member): member is Member => !!member);
+  }
+
+  get isOptedInToNextSession(): boolean {
+    const session = this.nextSession;
+    const member = this.currentMember;
+    if (!session || !member) return false;
+    return this.isPresent(session.id, member.id);
+  }
+
+  // Self-service attendance for a session that hasn't been finalized yet —
+  // any signed-in member can opt themselves in or out. Editors keep using
+  // toggleAttendance() (Attendance tab) for finalized sessions.
+  optInSession(sessionId: number): void {
+    if (!this.data) return;
+    const session = this.data.sessions.find(s => s.id === sessionId);
+    if (!session || session.status !== 'in_progress') return;
+    const member = this.currentMember;
+    if (!member) {
+      this.errorMessage = 'Your account is not linked to a member.';
+      return;
+    }
+
+    const key = String(sessionId);
+    if (!this.data.attendance[key]) this.data.attendance[key] = [];
+    if (this.data.attendance[key].includes(member.id)) return;
+
+    this.data.attendance[key].push(member.id);
+    this.recomputeDerivedState();
+    this.persistData("You're in for " + session.date + '.');
+  }
+
+  optOutSession(sessionId: number): void {
+    if (!this.data) return;
+    const session = this.data.sessions.find(s => s.id === sessionId);
+    if (!session || session.status !== 'in_progress') return;
+    const member = this.currentMember;
+    if (!member) return;
+
+    const key = String(sessionId);
+    const arr = this.data.attendance[key] || [];
+    if (!arr.includes(member.id)) return;
+
+    this.data.attendance[key] = arr.filter(id => id !== member.id);
+    this.recomputeDerivedState();
+    this.persistData('Marked as not playing ' + session.date + '.');
   }
 
   addNewSessionAttendee(memberId: number): void {
@@ -192,6 +293,7 @@ export class TrackerStoreService {
   addSession(): void {
     if (!this.data) return;
 
+    const startingInProgress = this.newSessionInProgress;
     const date = this.newSessionDate.trim();
     const notes = this.newSessionNotes.trim();
     const payments = this.newSessionPayments
@@ -206,28 +308,35 @@ export class TrackerStoreService {
       return;
     }
 
-    if (cost <= 0) {
-      this.errorMessage = 'Enter a court fee or shuttle cost, or record what was paid.';
-      return;
-    }
-
-    if (!payments.length) {
-      this.errorMessage = 'Add at least one valid payment row.';
-      return;
-    }
-
-    if (!attendees.length) {
-      this.errorMessage = 'Select who played — the cost is split across them.';
-      return;
+    // Starting a session in progress: only the date is required — cost,
+    // payments and attendees are all filled in later (attendees opt
+    // themselves in; someone finalizes cost/payments when marking it done).
+    if (!startingInProgress) {
+      if (cost <= 0) {
+        this.errorMessage = 'Enter a court fee or shuttle cost, or record what was paid.';
+        return;
+      }
+      if (!payments.length) {
+        this.errorMessage = 'Add at least one valid payment row.';
+        return;
+      }
+      if (!attendees.length) {
+        this.errorMessage = 'Select who played — the cost is split across them.';
+        return;
+      }
     }
 
     const id = this.data.nextId;
     this.data.nextId += 1;
 
-    const session: Session = { id, date, cost, payments, notes };
+    const session: Session = {
+      id, date, notes, payments,
+      cost: startingInProgress ? 0 : cost,
+      status: startingInProgress ? 'in_progress' : 'done'
+    };
     if (this.newSessionTime.trim()) session.time = this.newSessionTime.trim();
     if (this.newSessionVenue.trim()) session.venue = this.newSessionVenue.trim();
-    if (this.newSessionHasBreakdown) {
+    if (!startingInProgress && this.newSessionHasBreakdown) {
       session.courtFee = Number(this.newSessionCourtFee) || 0;
       session.shuttleCount = Number(this.newSessionShuttleCount) || 0;
       session.shuttlePrice = Number(this.newSessionShuttlePrice) || 0;
@@ -238,7 +347,7 @@ export class TrackerStoreService {
 
     this.recomputeDerivedState();
     this.resetSessionForm();
-    this.persistData('Session saved successfully.');
+    this.persistData(startingInProgress ? 'Session started — players can now opt in.' : 'Session saved successfully.');
   }
 
   deleteSession(id: number): void {
@@ -252,10 +361,34 @@ export class TrackerStoreService {
     this.persistData('Session deleted successfully.');
   }
 
-  updateSession(id: number, date: string, notes: string, payments: Payment[], breakdown?: SessionCostEdit): void {
+  updateSession(
+    id: number,
+    date: string,
+    notes: string,
+    payments: Payment[],
+    attendees: number[],
+    breakdown?: SessionCostEdit,
+    opts?: { keepInProgress?: boolean }
+  ): void {
     if (!this.data) return;
     const session = this.data.sessions.find(s => s.id === id);
     if (!session) { this.errorMessage = 'Session not found.'; return; }
+
+    // Editing an in-progress session without finalizing it: cost/payments
+    // stay optional, same as when it was started.
+    const wasInProgress = session.status === 'in_progress';
+    const staysInProgress = wasInProgress && opts?.keepInProgress === true;
+
+    const validAttendees = attendees.filter(memberId => !!this.memberById(memberId));
+
+    // Finalizing a session (whether it started in_progress or was already
+    // done) with nobody marked as having played would collect money without
+    // splitting it to anyone's share — same "who played" requirement
+    // addSession() enforces for a session created done.
+    if (!staysInProgress && !validAttendees.length) {
+      this.errorMessage = 'Select who played — the cost is split across them.';
+      return;
+    }
 
     const valid = payments
       .map(p => ({ memberId: Number(p.memberId), amount: Number(p.amount) || 0 }))
@@ -268,7 +401,11 @@ export class TrackerStoreService {
     const hasBreakdown = courtFee > 0 || shuttleCount * shuttlePrice > 0;
     const cost = hasBreakdown ? courtFee + shuttleCount * shuttlePrice : collected;
 
-    if (!date.trim() || cost <= 0) {
+    if (!date.trim()) {
+      this.errorMessage = 'Date is required.';
+      return;
+    }
+    if (!staysInProgress && cost <= 0) {
       this.errorMessage = 'Date and at least one valid payment required.';
       return;
     }
@@ -277,6 +414,8 @@ export class TrackerStoreService {
     session.notes = notes.trim();
     session.payments = valid;
     session.cost = cost;
+    session.status = staysInProgress ? 'in_progress' : 'done';
+    this.data.attendance[String(id)] = validAttendees;
 
     const time = breakdown?.time?.trim();
     const venue = breakdown?.venue?.trim();
@@ -294,7 +433,9 @@ export class TrackerStoreService {
     }
 
     this.recomputeDerivedState();
-    this.persistData('Session updated successfully.');
+    this.persistData(
+      staysInProgress ? 'Session updated.' : (wasInProgress ? 'Session marked as done.' : 'Session updated successfully.')
+    );
   }
 
   toggleAttendance(sessionId: number, memberId: number): void {
@@ -402,27 +543,6 @@ export class TrackerStoreService {
     this.resetDuesForm();
   }
 
-  prepareQuickDuesFor(memberId: number): void {
-    if (!this.data) return;
-
-    const selected = this.summary.find(item => item.id === memberId);
-    const candidates = this.summary
-      .filter(item => item.id !== memberId && item.balance > 0.5)
-      .sort((a, b) => b.balance - a.balance);
-
-    this.duesEditId = null;
-    this.duesFrom = memberId;
-    this.duesTo = candidates.length
-      ? candidates[0].id
-      : this.data.members.find(item => item.id !== memberId)?.id || memberId;
-    this.duesAmount = Number(Math.abs(selected?.balance || 0).toFixed(0));
-    this.duesDate = new Date().toISOString().split('T')[0];
-    this.duesNote = '';
-
-    this.errorMessage = '';
-    this.successMessage = 'Dues form prefilled for ' + this.memberName(memberId) + '.';
-  }
-
   addMember(): void {
     if (!this.data) return;
 
@@ -506,7 +626,9 @@ export class TrackerStoreService {
     const member = this.memberById(memberId);
     if (!member) return null;
 
-    const sessions = this.data.sessions;
+    // In-progress sessions aren't part of anyone's history/dues yet — see
+    // calcSummary() for the same rule applied to group balances.
+    const sessions = this.data.sessions.filter(session => session.status !== 'in_progress');
     const attendedSessions = sessions
       .filter(session => (this.data?.attendance[String(session.id)] || []).includes(memberId))
       .map(session => ({
@@ -627,7 +749,10 @@ export class TrackerStoreService {
     if (!this.data) return;
 
     this.summary = this.calcSummary(this.data);
-    this.totalSessions = this.data.sessions.reduce((sum, session) => sum + session.cost, 0);
+    // In-progress sessions haven't been finalized — same rule as calcSummary.
+    this.totalSessions = this.data.sessions
+      .filter(session => session.status !== 'in_progress')
+      .reduce((sum, session) => sum + session.cost, 0);
   }
 
   private resetSessionForm(): void {
@@ -640,6 +765,7 @@ export class TrackerStoreService {
     this.newSessionShuttleCount = null;
     this.newSessionAttendees = [];
     this.newSessionMemberQuery = '';
+    this.newSessionInProgress = false;
   }
 
   private resetDuesForm(): void {
@@ -703,6 +829,8 @@ export class TrackerStoreService {
     });
 
     data.sessions.forEach(session => {
+      if (session.status === 'in_progress') return;
+
       const attendees = data.attendance[String(session.id)] || [];
       if (!attendees.length) return;
 

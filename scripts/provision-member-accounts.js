@@ -86,7 +86,7 @@ async function main() {
     await db.collection('roles').doc(userRecord.uid).set({
       username: member.username,
       memberId: member.id,
-      role: 'viewer',
+      role: 'player',
       mustChangePassword: true,
       createdAt: new Date().toISOString()
     });

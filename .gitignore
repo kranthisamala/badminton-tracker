@@ -11,6 +11,7 @@ serviceAccountKey*.json
 
 # Timestamped Firestore snapshots written by the migration/backfill scripts.
 backup-trackerData-*.json
+backup-roles-*.json
 
 # Local-only credentials (test account passwords etc). Never commit.
 *.local.json

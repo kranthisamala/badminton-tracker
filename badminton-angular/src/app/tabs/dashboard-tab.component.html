@@ -1,88 +1,144 @@
-<section class="state-card">
-  <h2 class="section-title">Dashboard</h2>
-  <p class="dashboard-subtitle">Core insights from sessions, attendance, and settlement balances.</p>
-</section>
+<ng-container *ngIf="report; else noMember">
 
-<section class="dashboard-grid">
-
-  <article class="state-card chart-card dashboard-chart-card" [class.chart-card--expanded]="expandedCard === 'spendTrend'">
-    <div class="chart-card-head">
-      <h3>Spend Trend by Session</h3>
-      <div class="chart-card-actions">
-        <span class="chart-drilldown-hint">Click point → Sessions</span>
-        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('spendTrend')" aria-label="Export Spend Trend chart">⬇</button>
-        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'spendTrend' ? collapseCard() : expandCard('spendTrend')" [attr.aria-label]="expandedCard === 'spendTrend' ? 'Collapse chart' : 'Expand chart'">
-          {{ expandedCard === 'spendTrend' ? 'Collapse' : 'Expand' }}
-        </button>
+  <section class="state-card stat-row">
+    <div class="stat-cell">
+      <div class="micro-label">YOUR BALANCE</div>
+      <div class="stat-number" [class.owe]="isOwing(report.netBalance)" [class.settled]="isSettled(report.netBalance)">
+        <ng-container *ngIf="isOwing(report.netBalance)">−Rs {{ (report.netBalance * -1) | number:'1.0-0' }}</ng-container>
+        <ng-container *ngIf="isReceiving(report.netBalance)">+Rs {{ report.netBalance | number:'1.0-0' }}</ng-container>
+        <ng-container *ngIf="isSettled(report.netBalance)">Rs 0</ng-container>
+      </div>
+      <div class="stat-caption">
+        <ng-container *ngIf="isOwing(report.netBalance)">you owe the group</ng-container>
+        <ng-container *ngIf="isReceiving(report.netBalance)">owed to you</ng-container>
+        <ng-container *ngIf="isSettled(report.netBalance)">you're settled up</ng-container>
       </div>
     </div>
-    <div class="chart-canvas-wrap">
-      <canvas #spendTrendCanvas></canvas>
+    <div class="stat-cell">
+      <div class="micro-label">SESSIONS ATTENDED</div>
+      <div class="stat-number">{{ report.sessionsAttended }} / {{ report.totalSessions }}</div>
+      <div class="stat-caption">{{ report.attendanceRate | number:'1.0-1' }}% attendance</div>
     </div>
-  </article>
+    <div class="stat-cell">
+      <div class="micro-label">SHUTTLES USED</div>
+      <div class="stat-number">{{ store.totalShuttlesUsed }}</div>
+      <div class="stat-caption">{{ store.avgShuttlesPerSession | number:'1.0-1' }} per session</div>
+    </div>
+    <div class="stat-cell">
+      <div class="micro-label">UNSETTLED</div>
+      <div class="stat-number">Rs {{ store.totalUnsettled | number:'1.0-0' }}</div>
+      <div class="stat-caption">across {{ store.unsettledMemberCount }} players</div>
+    </div>
+  </section>
 
-  <article class="state-card chart-card dashboard-chart-card" [class.chart-card--expanded]="expandedCard === 'attendance'">
-    <div class="chart-card-head">
-      <h3>Attendance by Session</h3>
-      <div class="chart-card-actions">
-        <span class="chart-drilldown-hint">Click bar → Attendance</span>
-        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('attendance')" aria-label="Export Attendance chart">⬇</button>
-        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'attendance' ? collapseCard() : expandCard('attendance')">
-          {{ expandedCard === 'attendance' ? 'Collapse' : 'Expand' }}
-        </button>
-      </div>
-    </div>
-    <div class="chart-canvas-wrap">
-      <canvas #attendanceCanvas></canvas>
-    </div>
-  </article>
+  <div class="dashboard-columns inline-top-12">
+    <div class="dashboard-col-main">
 
-  <article class="state-card chart-card dashboard-chart-card" [class.chart-card--expanded]="expandedCard === 'attendanceRate'">
-    <div class="chart-card-head">
-      <h3>Member Attendance Rate</h3>
-      <div class="chart-card-actions">
-        <span class="chart-drilldown-hint">Click member → View report</span>
-        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('attendanceRate')" aria-label="Export Attendance Rate chart">⬇</button>
-        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'attendanceRate' ? collapseCard() : expandCard('attendanceRate')">
-          {{ expandedCard === 'attendanceRate' ? 'Collapse' : 'Expand' }}
-        </button>
-      </div>
-    </div>
-    <div class="chart-canvas-wrap">
-      <canvas #attendanceRateCanvas></canvas>
-    </div>
-  </article>
+      <section class="state-card next-session-card" *ngIf="store.nextSession as session; else noNextSession">
+        <div class="micro-label">NEXT SESSION<span class="in-progress-tag">In progress</span></div>
+        <div class="next-session-top">
+          <div>
+            <h3 class="next-session-date">
+              {{ session.date }}<ng-container *ngIf="session.time"> · {{ session.time }}</ng-container>
+            </h3>
+            <p class="session-meta" *ngIf="session.venue">{{ session.venue }}</p>
+          </div>
+          <div class="next-session-actions">
+            <button type="button" class="ghost-action-btn" [disabled]="!isOptedIn(session.id)" (click)="store.optOutSession(session.id)">Can't make it</button>
+            <button type="button" class="solid-action-btn" [disabled]="isOptedIn(session.id)" (click)="store.optInSession(session.id)">I'm in</button>
+          </div>
+        </div>
 
-  <article class="state-card chart-card dashboard-chart-card" [class.chart-card--expanded]="expandedCard === 'payOwe'">
-    <div class="chart-card-head">
-      <h3>Pay vs Owe by Member</h3>
-      <div class="chart-card-actions">
-        <span class="chart-drilldown-hint">Click member → View report</span>
-        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('payOwe')" aria-label="Export Pay vs Owe chart">⬇</button>
-        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'payOwe' ? collapseCard() : expandCard('payOwe')">
-          {{ expandedCard === 'payOwe' ? 'Collapse' : 'Expand' }}
-        </button>
-      </div>
-    </div>
-    <div class="chart-canvas-wrap">
-      <canvas #payOweCanvas></canvas>
-    </div>
-  </article>
+        <div class="attend-progress">
+          <div class="attend-progress-track"><span [style.width.%]="nextSessionProgressPct"></span></div>
+          <span class="attend-progress-label">{{ store.attendeesCount(session.id) }} / {{ store.data?.members?.length || 0 }} IN</span>
+        </div>
 
-  <article class="state-card chart-card dashboard-chart-card full-width" [class.chart-card--expanded]="expandedCard === 'balance'">
-    <div class="chart-card-head">
-      <h3>Net Balance by Member</h3>
-      <div class="chart-card-actions">
-        <span class="chart-drilldown-hint">Click member → View report</span>
-        <button class="ghost-btn chart-icon-btn" type="button" title="Export as PNG" (click)="exportChart('balance')" aria-label="Export Net Balance chart">⬇</button>
-        <button class="ghost-btn chart-expand-btn" type="button" (click)="expandedCard === 'balance' ? collapseCard() : expandCard('balance')">
-          {{ expandedCard === 'balance' ? 'Collapse' : 'Expand' }}
-        </button>
-      </div>
-    </div>
-    <div class="chart-canvas-wrap">
-      <canvas #balanceCanvas></canvas>
-    </div>
-  </article>
+        <div class="attend-chip-row">
+          <span class="attend-chip" *ngFor="let member of store.attendeeMembers(session.id)">{{ member.name }}</span>
+          <span class="attend-chip undecided" *ngIf="undecidedCount">+ {{ undecidedCount }} undecided</span>
+        </div>
+      </section>
+      <ng-template #noNextSession>
+        <section class="state-card">
+          <p class="dashboard-subtitle">No session in progress right now — check back once one is started.</p>
+        </section>
+      </ng-template>
 
-</section>
+      <section class="state-card inline-top-12">
+        <div class="block-head">
+          <div class="micro-label">RECENT SESSIONS</div>
+        </div>
+        <div class="table-wrap" *ngIf="recentSessions.length; else noRecent">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Court</th>
+                <th>Shuttles</th>
+                <th>In</th>
+                <th>Cost</th>
+                <th>Per head</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let session of recentSessions">
+                <td>{{ session.date }}</td>
+                <td class="text-muted-cell">{{ session.venue || '—' }}</td>
+                <td>{{ session.shuttleCount || 0 }}</td>
+                <td>{{ store.attendeesCount(session.id) }}</td>
+                <td>Rs {{ session.cost | number:'1.0-0' }}</td>
+                <td><strong>Rs {{ perHead(session) | number:'1.0-0' }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noRecent><p>No finished sessions yet.</p></ng-template>
+      </section>
+    </div>
+
+    <div class="dashboard-col-side">
+      <section class="state-card">
+        <h3 class="section-title">Recent Payments ({{ report.payments.length }})</h3>
+        <div class="session-list" *ngIf="report.payments.length; else noPayments">
+          <article class="session-card" *ngFor="let payment of report.payments.slice(-6).reverse()">
+            <div class="session-head">
+              <div>
+                <h3>{{ payment.label }}</h3>
+                <p>{{ store.formatDate(payment.date) }}</p>
+              </div>
+              <div class="session-cost">
+                <strong>Rs {{ payment.amount | number:'1.0-0' }}</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+        <ng-template #noPayments><p>No payments recorded yet.</p></ng-template>
+      </section>
+
+      <section class="state-card inline-top-12" *ngIf="spendBars.length">
+        <div class="micro-label">SPEND PER SESSION · LAST {{ spendBars.length }}</div>
+        <div class="spend-bar-row">
+          <span class="spend-bar" *ngFor="let bar of spendBars" [class.current]="bar.current" [style.height.%]="bar.pct" [title]="bar.date + ': Rs ' + bar.cost"></span>
+        </div>
+      </section>
+
+      <section class="state-card inline-top-12" *ngIf="attendanceRateRows.length">
+        <div class="micro-label">ATTENDANCE RATE</div>
+        <div class="rate-bar-list">
+          <div class="rate-bar-row" *ngFor="let row of attendanceRateRows">
+            <span class="rate-bar-name">{{ row.name }}</span>
+            <span class="rate-bar-track"><span [style.width.%]="row.rate"></span></span>
+            <span class="rate-bar-value">{{ row.rate | number:'1.0-0' }}%</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #noMember>
+  <section class="state-card">
+    <p>We couldn't match your account to a member record yet — ask the owner to check your username.</p>
+  </section>
+</ng-template>

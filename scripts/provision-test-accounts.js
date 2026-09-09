@@ -3,13 +3,14 @@
 //
 //   _testowner   owner
 //   _testeditor  editor
-//   _testviewer  viewer
+//   _testplayer  player
 //
 // They are marked `isTestAccount: true` and carry NO memberId, so they never
-// appear in Members / Summary / Dues / Attendance (all of which are built from
-// trackerData.members). The only place they surface is the Access tab, which
-// is owner-only — and firestore.rules restricts listing the roles collection
-// to the owner, so no other signed-in user can read them back either.
+// appear as a row in the member roster (Summary / Dues / Attendance, all of
+// which are built from trackerData.members). The only place they surface is
+// the owner-only "Accounts without a member" section of the Members tab —
+// firestore.rules restricts listing the roles collection to the owner, so no
+// other signed-in user can read them back either.
 //
 // NOTE: _testowner has real owner rights over real data. Use a strong password
 // and don't share it. The password is never written to this repo — pass it in,
@@ -32,7 +33,7 @@ const DELETE = process.argv.includes('--delete');
 const ACCOUNTS = [
   { username: '_testowner', role: 'owner' },
   { username: '_testeditor', role: 'editor' },
-  { username: '_testviewer', role: 'viewer' }
+  { username: '_testplayer', role: 'player' }
 ];
 
 function generatePassword() {

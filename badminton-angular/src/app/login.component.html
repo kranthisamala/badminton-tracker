@@ -1,7 +1,7 @@
 <div class="login-split">
   <div class="login-poster">
     <div class="login-poster-brand">
-      <span class="brand-icon">🏸</span>
+      <img src="assets/brand/logo-mark.svg" class="brand-icon" alt="Badminton Tracker">
       <div class="login-poster-brand-name">BADMINTON<br />TRACKER</div>
     </div>
     <h2 class="login-poster-headline">Who played. What it cost. Who still owes.</h2>
@@ -31,7 +31,8 @@
 
       <div class="actions-row">
         <button mat-flat-button color="primary" type="button" [disabled]="submitting" (click)="submit()">
-          Sign in
+          <span class="spinner spinner-on-accent" *ngIf="submitting" aria-hidden="true"></span>
+          {{ submitting ? 'Signing in…' : 'Sign in' }}
         </button>
       </div>
 

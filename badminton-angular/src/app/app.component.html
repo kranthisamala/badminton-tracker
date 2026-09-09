@@ -1,12 +1,20 @@
+<div class="boot-splash no-print" *ngIf="!auth.sessionReady">
+  <img src="assets/brand/logo-mark.svg" class="brand-icon" alt="Badminton Tracker">
+  <div class="boot-splash-brand">Badminton<br /><span>Tracker</span></div>
+  <span class="spinner" aria-hidden="true"></span>
+  <p class="boot-splash-text" role="status">Restoring your session…</p>
+</div>
+
+<ng-container *ngIf="auth.sessionReady">
 <ng-container *ngIf="auth.user && !auth.mustChangePassword; else authScreens">
   <div class="app-shell">
     <aside class="sidebar no-print">
       <div class="sidebar-brand">
-        <span class="brand-icon">🏸</span>
+        <img src="assets/brand/logo-mark.svg" class="brand-icon" alt="Badminton Tracker">
         <div class="sidebar-brand-name">Badminton<br><span>Tracker</span></div>
       </div>
 
-      <nav class="side-nav" *ngIf="!store.loading && !store.errorMessage">
+      <nav class="side-nav" *ngIf="!store.loading && !loadFailed">
         <button
           *ngFor="let item of sidebarNavItems"
           class="side-nav-item"
@@ -28,7 +36,7 @@
     <main class="main-content">
       <header class="content-header">
         <h2>{{ tabTitle }}</h2>
-        <div class="header-actions no-print" *ngIf="store.canEdit && !store.loading && !store.errorMessage">
+        <div class="header-actions no-print" *ngIf="store.canEdit && !store.loading && !loadFailed">
           <button class="ghost-btn" type="button" (click)="quickNewSession()">+ New session</button>
           <button class="ghost-btn" type="button" (click)="quickRecordDues()">Record dues</button>
         </div>
@@ -39,15 +47,21 @@
         shortly, or ask the owner to grant you access.
       </p>
 
-      <p class="view-only-banner no-print" *ngIf="auth.role === 'viewer'">
-        View only — you can see everything, but only an editor can make changes.
+      <p class="view-only-banner no-print" *ngIf="auth.role === 'player'">
+        You can see everything and opt in to sessions — only an editor can record costs or dues.
       </p>
 
-      <section *ngIf="store.loading" class="state-card">
-        <p>Loading data...</p>
+      <section *ngIf="store.loading" class="state-card loading-card">
+        <span class="spinner" aria-hidden="true"></span>
+        <p role="status">Loading data…</p>
       </section>
 
-      <section class="toast-stack no-print" *ngIf="!store.loading && (store.errorMessage || store.successMessage)">
+      <section *ngIf="!store.loading && store.errorMessage && !store.data" class="state-card load-error-card">
+        <p role="status">{{ store.errorMessage }}</p>
+        <button type="button" class="solid-action-btn" (click)="store.retryLoad()">Retry</button>
+      </section>
+
+      <section class="toast-stack no-print" *ngIf="!store.loading && store.data && (store.errorMessage || store.successMessage)">
         <article class="toast toast-error" *ngIf="store.errorMessage" role="status" aria-live="polite">
           <p>{{ store.errorMessage }}</p>
           <button class="ghost-btn toast-close" (click)="dismissError()" aria-label="Dismiss error notification">×</button>
@@ -60,18 +74,17 @@
       </section>
 
       <div class="tab-content">
-        <app-summary-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'summary'"></app-summary-tab>
-        <app-dashboard-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dashboard' && store.canEdit" (drilldown)="onDashboardDrilldown($event)"></app-dashboard-tab>
-        <app-my-dashboard-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dashboard' && !store.canEdit"></app-my-dashboard-tab>
-        <app-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'attendance'"></app-attendance-tab>
-        <app-sessions-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'sessions'"></app-sessions-tab>
-        <app-dues-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dues'"></app-dues-tab>
-        <app-members-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'members'"></app-members-tab>
-        <app-activity-log-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'activity'"></app-activity-log-tab>
+        <app-dashboard-tab *ngIf="!store.loading && !loadFailed && activeTab === 'dashboard'"></app-dashboard-tab>
+        <app-reports-tab *ngIf="!store.loading && !loadFailed && activeTab === 'reports'" (drilldown)="onReportsDrilldown($event)"></app-reports-tab>
+        <app-attendance-tab *ngIf="!store.loading && !loadFailed && activeTab === 'attendance'"></app-attendance-tab>
+        <app-sessions-tab *ngIf="!store.loading && !loadFailed && activeTab === 'sessions'"></app-sessions-tab>
+        <app-dues-tab *ngIf="!store.loading && !loadFailed && activeTab === 'dues'"></app-dues-tab>
+        <app-members-tab *ngIf="!store.loading && !loadFailed && activeTab === 'members'"></app-members-tab>
+        <app-activity-log-tab *ngIf="!store.loading && !loadFailed && activeTab === 'activity'"></app-activity-log-tab>
       </div>
     </main>
 
-    <nav class="bottom-nav no-print" *ngIf="!store.loading && !store.errorMessage">
+    <nav class="bottom-nav no-print" *ngIf="!store.loading && !loadFailed">
       <button
         *ngFor="let item of bottomPrimaryItems"
         class="bottom-nav-item"
@@ -123,13 +136,14 @@
     </div>
   </div>
 </ng-container>
+</ng-container>
 
 <ng-template #authScreens>
   <app-login *ngIf="!auth.user"></app-login>
 
   <main class="page auth-page" *ngIf="auth.user && auth.mustChangePassword">
     <header class="page-header">
-      <span class="brand-icon">🏸</span>
+      <img src="assets/brand/logo-mark.svg" class="brand-icon" alt="Badminton Tracker">
       <h1>Badminton <span>Tracker</span></h1>
     </header>
 

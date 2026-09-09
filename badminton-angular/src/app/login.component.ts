@@ -25,9 +25,11 @@ export class LoginComponent {
     this.submitting = true;
     try {
       await this.auth.login(this.username.trim().toLowerCase(), this.password);
+      // Deliberately stay in the submitting state on success: the app shell
+      // replaces this screen once auth state propagates, and resetting here
+      // would flash an idle "Sign in" button in the gap.
     } catch {
       // auth.errorMessage already set by AuthService
-    } finally {
       this.submitting = false;
     }
   }

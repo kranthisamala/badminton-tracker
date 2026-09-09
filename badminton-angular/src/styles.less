@@ -92,17 +92,13 @@ html {
   border-bottom: 1px solid @border-base;
 }
 
+// The mark is a self-contained SVG tile (own ink background + accent rule),
+// so this only needs to size and align it — no background/border of its own.
 .brand-icon {
   width: 40px;
   height: 40px;
   flex: 0 0 auto;
-  border-radius: 0;
-  background: @surface-strong;
-  border: 1px solid fade(@accent, 30%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
+  display: block;
 }
 
 .page-header h1 {
@@ -360,11 +356,6 @@ html {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.login-poster-brand .brand-icon {
-  background: @ink;
-  border-color: fade(@bg-page, 40%);
 }
 
 .login-poster-brand-name {
@@ -908,6 +899,91 @@ html {
   }
 }
 
+// ── Loading states ──
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border: 2px solid fade(@ink, 20%);
+  border-top-color: @accent;
+  border-radius: 50%;
+  animation: spinner-rotate 0.7s linear infinite;
+}
+
+.spinner-on-accent {
+  border-color: fade(#ffffff, 45%);
+  border-top-color: #ffffff;
+  margin-right: 8px;
+  vertical-align: -2px;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+// Respect users who have asked for less motion: keep the indicator visible,
+// just stop it spinning.
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 3s; }
+}
+
+.boot-splash {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: @bg-page;
+
+  .brand-icon { width: 56px; height: 56px; }
+}
+
+.boot-splash-brand {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-transform: uppercase;
+  color: @ink;
+
+  span { color: @accent; }
+}
+
+.boot-splash-text {
+  margin: 0;
+  font-size: 0.78rem;
+  color: @text-muted;
+}
+
+.loading-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  p {
+    margin: 0;
+    color: @text-muted;
+  }
+}
+
+.load-error-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-color: @danger-border;
+
+  p {
+    margin: 0;
+    color: @danger;
+  }
+}
+
 .row-actions {
   display: flex;
   align-items: center;
@@ -984,6 +1060,57 @@ html {
   margin-bottom: 18px;
 }
 
+.in-progress-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-bottom: 1px solid @border-base;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: @text-soft;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: @accent;
+    cursor: pointer;
+  }
+}
+
+.in-progress-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: @accent;
+  color: #ffffff;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.opt-in-btn {
+  padding: 8px 14px;
+  background: transparent;
+  border: 2px solid @border-strong;
+  color: @ink;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover { background: fade(@ink, 6%); }
+
+  &.is-in {
+    background: @surface-strong;
+    color: @bg-page;
+    border-color: @surface-strong;
+  }
+}
+
 .new-session-head {
   padding: 16px 22px;
   border-bottom: 2px solid @border-strong;
@@ -1046,6 +1173,12 @@ html {
   gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 12px;
+}
+
+.export-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
 }
 
 .block-head-actions {
@@ -1259,6 +1392,234 @@ html {
   padding: 12px;
 }
 
+.in-progress-card {
+  border-left: 4px solid @accent;
+}
+
+// ── Individual dashboard — mockup 1a: stat row + two-column ledger ──
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 0;
+}
+
+.stat-cell {
+  padding: 18px 20px;
+  border-right: 1px solid @border-base;
+
+  &:last-child { border-right: 0; }
+}
+
+.stat-number {
+  margin-top: 9px;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: @ink;
+
+  &.owe { color: @danger; }
+  &.settled { color: @text-muted; }
+}
+
+.stat-caption {
+  margin-top: 7px;
+  color: @text-muted;
+  font-size: 0.76rem;
+}
+
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+// Grid items default to min-width:auto, sized off their content's
+// min-content — a bare <canvas> has an intrinsic 300px width that can then
+// fight the track's actual width and never converge. Pin both explicitly.
+.dashboard-col-main,
+.dashboard-col-side {
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .dashboard-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-cell:nth-child(2) { border-right: 0; }
+}
+
+.next-session-card .micro-label {
+  display: flex;
+  align-items: center;
+}
+
+.next-session-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.next-session-date {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+}
+
+.next-session-actions {
+  display: flex;
+  gap: 10px;
+  flex: none;
+}
+
+.ghost-action-btn,
+.solid-action-btn {
+  padding: 10px 16px;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid @border-strong;
+
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+.ghost-action-btn {
+  background: transparent;
+  color: @ink;
+
+  &:hover:not(:disabled) { background: fade(@ink, 6%); }
+}
+
+.solid-action-btn {
+  background: @accent;
+  border-color: @accent;
+  color: #ffffff;
+
+  &:hover:not(:disabled) { background: @accent-hover; border-color: @accent-hover; }
+}
+
+.attend-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.attend-progress-track {
+  flex: 1;
+  height: 10px;
+  border: 2px solid @border-strong;
+
+  span {
+    display: block;
+    height: 100%;
+    background: @surface-strong;
+  }
+}
+
+.attend-progress-label {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.attend-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.attend-chip {
+  padding: 6px 9px;
+  border: 1px solid @border-strong;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: @ink;
+
+  &.undecided {
+    border: 1px dashed @text-neutral;
+    color: @text-muted;
+    font-weight: 500;
+  }
+}
+
+// Mockup 1a's two mini-visualizations are plain CSS bars, not a charting
+// library — matched directly rather than reaching for Chart.js here.
+.spend-bar-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 96px;
+  margin-top: 12px;
+  border-bottom: 2px solid @border-strong;
+}
+
+.spend-bar {
+  flex: 1;
+  background: @chart-muted-slice;
+  display: block;
+  min-height: 4px;
+
+  &.current { background: @ink; }
+}
+
+.rate-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 10px;
+}
+
+.rate-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rate-bar-name {
+  width: 76px;
+  flex: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rate-bar-track {
+  flex: 1;
+  height: 9px;
+  background: fade(@ink, 12%);
+  display: block;
+
+  span {
+    display: block;
+    height: 100%;
+    background: @surface-strong;
+  }
+}
+
+.rate-bar-value {
+  width: 34px;
+  flex: none;
+  text-align: right;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .session-head {
   display: flex;
   justify-content: space-between;
@@ -1314,133 +1675,6 @@ html {
 
 .session-edit-grid {
   margin-bottom: 0;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 12px;
-}
-
-.player-card {
-  background: @bg-card;
-  border: 1px solid @border-base;
-  border-radius: 0;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.player-card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.player-card h2 {
-  margin: 0 0 10px;
-  color: @ink;
-  font-size: 1.02rem;
-}
-
-.player-card-head h2 {
-  margin-bottom: 0;
-}
-
-.summary-card-menu {
-  position: relative;
-}
-
-.card-menu-trigger {
-  min-width: 34px;
-  padding: 6px 10px;
-  font-size: 1rem;
-  line-height: 1;
-}
-
-.card-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  min-width: 150px;
-  background: @bg-input;
-  border: 1px solid @border-base;
-  border-radius: 0;
-  padding: 6px;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  z-index: 5;
-}
-
-.card-menu button {
-  border: none;
-  background: transparent;
-  color: @text-main;
-  text-align: left;
-  padding: 8px 10px;
-  border-radius: 0;
-  cursor: pointer;
-}
-
-.card-menu button:hover {
-  background: @bg-card;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.84rem;
-  color: @text-muted;
-  margin-bottom: 5px;
-}
-
-.stat-row span:last-child {
-  color: @text-main;
-}
-
-.balance {
-  margin: auto 0 0;
-  padding: 8px;
-  border-radius: 0;
-  text-align: center;
-  font-size: 0.85rem;
-}
-
-button.balance {
-  width: 100%;
-  border: none;
-  font: inherit;
-  cursor: pointer;
-  transition: filter 0.15s ease;
-}
-
-button.balance:hover {
-  filter: brightness(1.2);
-}
-
-button.balance:focus-visible {
-  outline: 2px solid @accent;
-  outline-offset: 2px;
-}
-
-.balance.receive {
-  background: @surface-strong;
-  color: @bg-page;
-}
-
-.balance.owe {
-  background: @danger-bg;
-  color: @danger;
-}
-
-.balance.settled {
-  background: @bg-input;
-  color: @text-muted;
 }
 
 .dues-layout {
@@ -1579,13 +1813,6 @@ button.balance:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-
-.summary-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-bottom: 12px;
 }
 
 .dashboard-subtitle {
@@ -1793,5 +2020,22 @@ button.balance:focus-visible {
     padding: 0;
     background: #fff;
     color: #111;
+  }
+
+  // .main-content is the actual container once printing happens from inside
+  // the app shell (e.g. the Dues tab) rather than the pre-login .page layout.
+  body,
+  .app-shell,
+  .main-content {
+    background: #fff;
+  }
+
+  .main-content {
+    padding: 0;
+  }
+
+  .state-card {
+    box-shadow: none;
+    border-color: #000;
   }
 }

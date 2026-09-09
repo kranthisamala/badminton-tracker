@@ -9,7 +9,7 @@ import {
 import { collection, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import { auth, db } from './firebase.config';
 
-export type UserRole = 'viewer' | 'editor' | 'owner';
+export type UserRole = 'player' | 'editor' | 'owner';
 
 export interface RoleRecord {
   username: string;
@@ -46,6 +46,7 @@ function friendlyAuthError(err: unknown): string {
 export class AuthService {
   user: User | null = null;
   authReady = false;
+  roleReady = false;
   role: UserRole | null = null;
   username: string | null = null;
   mustChangePassword = false;
@@ -62,16 +63,32 @@ export class AuthService {
       this.role = null;
       this.username = null;
       this.mustChangePassword = false;
+      // With no user there is no role to wait for; with one, stay "not ready"
+      // until the role doc arrives so the UI never renders against a role of
+      // null that is about to become owner/editor.
+      this.roleReady = !user;
 
       if (user) {
-        this.roleUnsubscribe = onSnapshot(doc(db, 'roles', user.uid), snapshot => {
-          const data = snapshot.data() as RoleRecord | undefined;
-          this.role = data?.role ?? null;
-          this.username = data?.username ?? null;
-          this.mustChangePassword = data?.mustChangePassword ?? false;
-        });
+        this.roleUnsubscribe = onSnapshot(
+          doc(db, 'roles', user.uid),
+          snapshot => {
+            const data = snapshot.data() as RoleRecord | undefined;
+            this.role = data?.role ?? null;
+            this.username = data?.username ?? null;
+            this.mustChangePassword = data?.mustChangePassword ?? false;
+            this.roleReady = true;
+          },
+          () => { this.roleReady = true; }
+        );
       }
     });
+  }
+
+  // Firebase restores a persisted session asynchronously. Until both the auth
+  // state and the role doc have resolved, we know nothing about the visitor —
+  // rendering before that flashes the login screen at signed-in users.
+  get sessionReady(): boolean {
+    return this.authReady && this.roleReady;
   }
 
   get canEdit(): boolean {

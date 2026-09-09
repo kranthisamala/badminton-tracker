@@ -1,5 +1,11 @@
 <section class="state-card">
-  <h2 class="section-title">Dues &amp; Balances</h2>
+  <div class="block-head">
+    <h2 class="section-title">Dues &amp; Balances</h2>
+    <div class="export-actions no-print">
+      <button class="ghost-btn" type="button" (click)="copyBalances()">Copy</button>
+      <button class="ghost-btn" type="button" (click)="printBalances()">Print</button>
+    </div>
+  </div>
   <div class="dues-layout">
     <div class="table-wrap">
       <table>

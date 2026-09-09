@@ -1,7 +1,47 @@
+<section class="state-card" *ngIf="store.inProgressSessions.length">
+  <h2 class="section-title">Sessions in progress ({{ store.inProgressSessions.length }})</h2>
+  <div class="session-list">
+    <article class="session-card in-progress-card" *ngFor="let session of store.inProgressSessions">
+
+      <ng-container *ngIf="editingSessionId !== session.id; else editForm">
+        <div class="session-head">
+          <div>
+            <h3>{{ session.date }}<span class="in-progress-tag">In progress</span></h3>
+            <p class="session-meta" *ngIf="session.time || session.venue">
+              <span *ngIf="session.time">{{ session.time }}</span>
+              <span *ngIf="session.time && session.venue"> · </span>
+              <span *ngIf="session.venue">{{ session.venue }}</span>
+            </p>
+            <p *ngIf="session.notes">{{ session.notes }}</p>
+          </div>
+          <ng-container *ngIf="store.canEdit">
+            <button mat-stroked-button (click)="startEdit(session)">Mark as done</button>
+          </ng-container>
+        </div>
+
+        <p class="session-players">
+          {{ store.attendeesCount(session.id) }} opted in<ng-container *ngIf="memberNames(session.id)"> — {{ memberNames(session.id) }}</ng-container>
+        </p>
+
+        <div class="actions-row" *ngIf="store.currentMember as me">
+          <button type="button" class="opt-in-btn" [class.is-in]="store.isPresent(session.id, me.id)"
+            (click)="store.isPresent(session.id, me.id) ? store.optOutSession(session.id) : store.optInSession(session.id)">
+            {{ store.isPresent(session.id, me.id) ? "You're in ✓" : "I'm in" }}
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-template #editForm>
+        <ng-container *ngTemplateOutlet="editSessionForm; context: { session: session, finalizing: true }"></ng-container>
+      </ng-template>
+    </article>
+  </div>
+</section>
+
 <section class="state-card">
-  <h2 class="section-title">Session History ({{ store.data?.sessions?.length || 0 }})</h2>
-  <div class="session-list" *ngIf="store.data?.sessions?.length; else noSessions">
-    <article class="session-card" *ngFor="let session of store.sortedSessions">
+  <h2 class="section-title">Session History ({{ doneSessions.length }})</h2>
+  <div class="session-list" *ngIf="doneSessions.length; else noSessions">
+    <article class="session-card" *ngFor="let session of doneSessions">
 
       <!-- View mode -->
       <ng-container *ngIf="editingSessionId !== session.id">
@@ -45,84 +85,140 @@
 
       <!-- Edit mode -->
       <ng-container *ngIf="editingSessionId === session.id">
-        <div class="session-edit-head">
-          <span class="session-edit-label">Editing Session #{{ session.id }}</span>
-          <div class="session-cost">
-            <strong>Rs {{ editSessionCost | number:'1.0-0' }}</strong>
-          </div>
-        </div>
-
-        <div class="field-grid field-grid-3 session-edit-grid">
-          <mat-form-field appearance="outline" class="tab-field">
-            <mat-label>Date</mat-label>
-            <input matInput type="text" [(ngModel)]="editDate" placeholder="e.g. 17th July" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="tab-field">
-            <mat-label>Time</mat-label>
-            <input matInput type="text" [(ngModel)]="editTime" placeholder="e.g. 7:00 – 9:00 PM" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="tab-field">
-            <mat-label>Venue / court</mat-label>
-            <input matInput type="text" [(ngModel)]="editVenue" placeholder="e.g. Smash Arena C3" />
-          </mat-form-field>
-        </div>
-
-        <div class="field-grid field-grid-3">
-          <mat-form-field appearance="outline" class="tab-field">
-            <mat-label>Court fee</mat-label>
-            <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
-            <input matInput type="number" min="0" [(ngModel)]="editCourtFee" placeholder="0" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="tab-field">
-            <mat-label>Shuttles used</mat-label>
-            <input matInput type="number" min="0" [(ngModel)]="editShuttleCount" placeholder="0" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="tab-field">
-            <mat-label>Price / shuttle</mat-label>
-            <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
-            <input matInput type="number" min="0" [(ngModel)]="editShuttlePrice" placeholder="0" />
-          </mat-form-field>
-        </div>
-
-        <mat-form-field appearance="outline" class="tab-field full-width">
-          <mat-label>Notes (optional)</mat-label>
-          <input matInput type="text" [(ngModel)]="editNotes" placeholder="e.g. Extra shuttle used" />
-        </mat-form-field>
-
-        <div class="form-block">
-          <div class="block-head">
-            <div class="micro-label">WHO PAID THE VENUE</div>
-            <span class="block-head-note">Collected Rs {{ editSessionCost | number:'1.0-0' }}</span>
-          </div>
-          <div class="payment-row" *ngFor="let payment of editPayments; let i = index">
-            <mat-form-field appearance="outline" class="tab-field">
-              <mat-label>Player</mat-label>
-              <mat-select [(ngModel)]="payment.memberId">
-                <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="tab-field">
-              <mat-label>Amount</mat-label>
-              <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
-              <input matInput type="number" min="0" [(ngModel)]="payment.amount" placeholder="0" />
-            </mat-form-field>
-            <button
-              type="button"
-              class="remove-payer-btn"
-              aria-label="Remove payer"
-              [disabled]="editPayments.length === 1"
-              (click)="removeEditPaymentRow(i)">×</button>
-          </div>
-          <button type="button" class="add-payer-btn" (click)="addEditPaymentRow()">+ Add payer</button>
-        </div>
-
-        <div class="actions-row">
-          <button mat-flat-button color="primary" (click)="saveEdit()">Save Changes</button>
-          <button mat-stroked-button (click)="cancelEdit()">Cancel</button>
-        </div>
+        <ng-container *ngTemplateOutlet="editSessionForm; context: { session: session, finalizing: false }"></ng-container>
       </ng-container>
 
     </article>
   </div>
-  <ng-template #noSessions><p>No sessions yet.</p></ng-template>
+  <ng-template #noSessions><p>No finished sessions yet.</p></ng-template>
 </section>
+
+<!-- Shared edit form: `finalizing` is true only for an in-progress session
+     being edited, which is what unlocks the two-button "stay in progress" /
+     "mark as done" choice below. -->
+<ng-template #editSessionForm let-session="session" let-finalizing="finalizing">
+  <div class="session-edit-head">
+    <span class="session-edit-label">
+      {{ finalizing ? 'Marking session as done' : 'Editing Session #' + session.id }}
+    </span>
+    <div class="session-cost">
+      <strong>Rs {{ editSessionCost | number:'1.0-0' }}</strong>
+    </div>
+  </div>
+
+  <div class="field-grid field-grid-3 session-edit-grid">
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Date</mat-label>
+      <input matInput type="text" [(ngModel)]="editDate" placeholder="e.g. 17th July" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Time</mat-label>
+      <input matInput type="text" [(ngModel)]="editTime" placeholder="e.g. 7:00 – 9:00 PM" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Venue / court</mat-label>
+      <input matInput type="text" [(ngModel)]="editVenue" placeholder="e.g. Smash Arena C3" />
+    </mat-form-field>
+  </div>
+
+  <div class="field-grid field-grid-3">
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Court fee</mat-label>
+      <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
+      <input matInput type="number" min="0" [(ngModel)]="editCourtFee" placeholder="0" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Shuttles used</mat-label>
+      <input matInput type="number" min="0" [(ngModel)]="editShuttleCount" placeholder="0" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="tab-field">
+      <mat-label>Price / shuttle</mat-label>
+      <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
+      <input matInput type="number" min="0" [(ngModel)]="editShuttlePrice" placeholder="0" />
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" class="tab-field full-width">
+    <mat-label>Notes (optional)</mat-label>
+    <input matInput type="text" [(ngModel)]="editNotes" placeholder="e.g. Extra shuttle used" />
+  </mat-form-field>
+
+  <div class="form-block">
+    <div class="block-head">
+      <div class="micro-label">WHO PLAYED · {{ editAttendees.length }} SELECTED</div>
+    </div>
+
+    <div #editMemberChipWrapper>
+      <mat-form-field appearance="outline" class="tab-field member-chip-field">
+        <mat-label>Members in session ({{ editAttendees.length }} / {{ store.data?.members?.length || 0 }})</mat-label>
+        <mat-chip-grid #editChipGrid aria-label="Session players">
+          <mat-chip
+            *ngFor="let member of editAttendeeMembers"
+            [removable]="true"
+            (removed)="removeEditAttendee(member.id)"
+            class="member-chip">
+            {{ member.name }}
+            <button matChipRemove aria-label="Remove player">×</button>
+          </mat-chip>
+        </mat-chip-grid>
+        <input
+          #editMemberInput
+          matInput
+          [ngModel]="editMemberQuery"
+          (ngModelChange)="editMemberQuery = $event"
+          [matChipInputFor]="editChipGrid"
+          [matAutocomplete]="editMembersAuto"
+          placeholder="Type a name to add…" />
+        <mat-autocomplete
+          #editMembersAuto="matAutocomplete"
+          [panelWidth]="editMemberPickerWidth"
+          (optionSelected)="onEditMemberSelected($event)">
+          <mat-option *ngFor="let member of editCandidateMembers" [value]="member.id" class="member-ac-option">
+            {{ member.name }}
+          </mat-option>
+          <mat-option *ngIf="!editCandidateMembers.length" disabled class="member-ac-empty">
+            All members added
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="form-block">
+    <div class="block-head">
+      <div class="micro-label">WHO PAID THE VENUE</div>
+      <span class="block-head-note">Collected Rs {{ editSessionCost | number:'1.0-0' }}</span>
+    </div>
+    <div class="payment-row" *ngFor="let payment of editPayments; let i = index">
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Player</mat-label>
+        <mat-select [(ngModel)]="payment.memberId">
+          <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Amount</mat-label>
+        <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
+        <input matInput type="number" min="0" [(ngModel)]="payment.amount" placeholder="0" />
+      </mat-form-field>
+      <button
+        type="button"
+        class="remove-payer-btn"
+        aria-label="Remove payer"
+        [disabled]="editPayments.length === 1"
+        (click)="removeEditPaymentRow(i)">×</button>
+    </div>
+    <button type="button" class="add-payer-btn" (click)="addEditPaymentRow()">+ Add payer</button>
+  </div>
+
+  <div class="actions-row">
+    <ng-container *ngIf="finalizing; else plainSave">
+      <button mat-flat-button color="primary" (click)="saveEdit(true)">Save (keep in progress)</button>
+      <button mat-flat-button color="primary" (click)="saveEdit(false)">Mark as done</button>
+    </ng-container>
+    <ng-template #plainSave>
+      <button mat-flat-button color="primary" (click)="saveEdit(false)">Save Changes</button>
+    </ng-template>
+    <button mat-stroked-button (click)="cancelEdit()">Cancel</button>
+  </div>
+</ng-template>

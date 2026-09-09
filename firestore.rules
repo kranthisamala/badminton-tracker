@@ -9,7 +9,15 @@ service cloud.firestore {
 
     match /trackerData/{docId} {
       allow read: if request.auth != null;
-      allow write: if canEdit();
+      // Editors/owner can write anything. Everyone else (players) may only
+      // opt themselves in/out of an in-progress session, which touches
+      // nothing but the attendance map — sessions, members, dues, and
+      // everything else stay untouched. This is what lets a player self-serve
+      // attendance (see TrackerStoreService.optInSession/optOutSession)
+      // without granting edit rights over costs or payments.
+      allow write: if canEdit()
+        || (request.auth != null
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['attendance']));
     }
 
     match /auditLog/{entryId} {
