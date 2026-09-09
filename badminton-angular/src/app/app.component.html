@@ -63,13 +63,11 @@
         <app-summary-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'summary'"></app-summary-tab>
         <app-dashboard-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dashboard' && store.canEdit" (drilldown)="onDashboardDrilldown($event)"></app-dashboard-tab>
         <app-my-dashboard-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dashboard' && !store.canEdit"></app-my-dashboard-tab>
-        <app-quick-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'quick-attendance'"></app-quick-attendance-tab>
         <app-attendance-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'attendance'"></app-attendance-tab>
         <app-sessions-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'sessions'"></app-sessions-tab>
         <app-dues-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'dues'"></app-dues-tab>
         <app-members-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'members'"></app-members-tab>
         <app-activity-log-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'activity'"></app-activity-log-tab>
-        <app-access-tab *ngIf="!store.loading && !store.errorMessage && activeTab === 'access' && auth.isOwner"></app-access-tab>
       </div>
     </main>
 
@@ -96,6 +94,32 @@
           {{ item.label }}
         </button>
       </div>
+    </div>
+
+    <div class="modal-overlay no-print" *ngIf="store.showNewSessionModal" (click)="closeNewSession()">
+      <section class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-label="New session" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div>
+            <div class="micro-label">SESSIONS / NEW</div>
+            <h3>New session</h3>
+          </div>
+          <button class="ghost-btn" type="button" (click)="closeNewSession()" aria-label="Close">×</button>
+        </div>
+        <app-new-session-form (saved)="closeNewSession()" (cancelled)="closeNewSession()"></app-new-session-form>
+      </section>
+    </div>
+
+    <div class="modal-overlay no-print" *ngIf="store.showRecordDuesModal" (click)="closeRecordDues()">
+      <section class="modal-card" role="dialog" aria-modal="true" aria-label="Record dues payment" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div>
+            <div class="micro-label">{{ store.duesEditId !== null ? 'DUES / EDIT' : 'DUES / NEW' }}</div>
+            <h3>{{ store.duesEditId !== null ? 'Edit dues payment' : 'Record dues payment' }}</h3>
+          </div>
+          <button class="ghost-btn" type="button" (click)="closeRecordDues()" aria-label="Close">×</button>
+        </div>
+        <app-record-dues-form (saved)="closeRecordDues()" (cancelled)="closeRecordDues()"></app-record-dues-form>
+      </section>
     </div>
   </div>
 </ng-container>

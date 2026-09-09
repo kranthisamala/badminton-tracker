@@ -5,9 +5,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { Session } from '../models';
 import { TrackerStoreService } from '../state/tracker-store.service';
 
@@ -20,19 +17,19 @@ import { TrackerStoreService } from '../state/tracker-store.service';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDatepickerModule,
-    MatNativeDateModule
+    MatButtonModule
   ],
   templateUrl: './sessions-tab.component.html'
 })
 export class SessionsTabComponent {
-  sessionDateValue: Date | null = null;
-
   editingSessionId: number | null = null;
   editDate = '';
   editNotes = '';
+  editTime = '';
+  editVenue = '';
+  editCourtFee: number | null = null;
+  editShuttleCount: number | null = null;
+  editShuttlePrice: number | null = null;
   editPayments: { memberId: number; amount: number }[] = [];
 
   constructor(public readonly store: TrackerStoreService) {}
@@ -41,18 +38,15 @@ export class SessionsTabComponent {
     return this.editPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   }
 
-  onDateSelected(date: Date | null): void {
-    if (!date) {
-      this.store.newSessionDate = '';
-      return;
-    }
-    this.store.newSessionDate = this.formatDateLabel(date);
-  }
-
   startEdit(session: Session): void {
     this.editingSessionId = session.id;
     this.editDate = session.date;
     this.editNotes = session.notes || '';
+    this.editTime = session.time || '';
+    this.editVenue = session.venue || '';
+    this.editCourtFee = session.courtFee ?? null;
+    this.editShuttleCount = session.shuttleCount ?? null;
+    this.editShuttlePrice = session.shuttlePrice ?? null;
     this.editPayments = session.payments.map(p => ({ memberId: p.memberId, amount: p.amount }));
   }
 
@@ -70,16 +64,13 @@ export class SessionsTabComponent {
 
   saveEdit(): void {
     if (this.editingSessionId === null) return;
-    this.store.updateSession(this.editingSessionId, this.editDate, this.editNotes, [...this.editPayments]);
+    this.store.updateSession(this.editingSessionId, this.editDate, this.editNotes, [...this.editPayments], {
+      time: this.editTime,
+      venue: this.editVenue,
+      courtFee: this.editCourtFee,
+      shuttleCount: this.editShuttleCount,
+      shuttlePrice: this.editShuttlePrice
+    });
     if (!this.store.errorMessage) this.editingSessionId = null;
-  }
-
-  private formatDateLabel(date: Date): string {
-    const day = date.getDate();
-    const month = date.toLocaleDateString('en-IN', { month: 'long' });
-    const v = day % 100;
-    const suffixes = ['th', 'st', 'nd', 'rd'];
-    const suffix = suffixes[(v - 20) % 10] ?? suffixes[v] ?? suffixes[0];
-    return `${day}${suffix} ${month}`;
   }
 }

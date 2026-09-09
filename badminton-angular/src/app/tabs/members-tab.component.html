@@ -1,16 +1,56 @@
 <section class="state-card">
-  <h2 class="section-title">Current Members ({{ store.data?.members?.length || 0 }})</h2>
-  <div class="chip-grid" *ngIf="store.data?.members?.length; else noMembers">
-    <div class="chip" *ngFor="let member of store.data?.members">
-      <span>{{ member.name }} <small>&#64;{{ member.username }}</small></span>
-      <div class="chip-actions">
-        <button mat-stroked-button (click)="openMemberReport(member.id)">Report</button>
-        <ng-container *ngIf="store.canEdit">
-          <button mat-stroked-button (click)="store.renameMember(member.id)">Rename</button>
-          <button mat-stroked-button color="warn" (click)="store.removeMember(member.id)">Remove</button>
-        </ng-container>
-      </div>
-    </div>
+  <h2 class="section-title">Members ({{ store.data?.members?.length || 0 }})</h2>
+  <p class="dashboard-subtitle" *ngIf="auth.isOwner">
+    Everyone with an account can view all data. Only editors (and you, the
+    owner) can make changes.
+  </p>
+
+  <div class="table-wrap" *ngIf="store.data?.members?.length; else noMembers">
+    <table>
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Username</th>
+          <th *ngIf="auth.isOwner">Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let member of store.data?.members">
+          <td>{{ member.name }}</td>
+          <td class="mono-cell">&#64;{{ member.username }}</td>
+          <td *ngIf="auth.isOwner">
+            <span *ngIf="accountFor(member.username) as account; else noAccount">{{ account.role }}</span>
+            <ng-template #noAccount><span class="text-muted-cell">no account</span></ng-template>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="icon-btn" title="View report" aria-label="View report" (click)="openMemberReport(member.id)">
+                <mat-icon>bar_chart</mat-icon>
+              </button>
+              <ng-container *ngIf="store.canEdit">
+                <button type="button" class="icon-btn" title="Rename member" aria-label="Rename member" (click)="store.renameMember(member.id)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button type="button" class="icon-btn danger" title="Remove member" aria-label="Remove member" (click)="store.removeMember(member.id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </ng-container>
+              <ng-container *ngIf="auth.isOwner && accountFor(member.username) as account">
+                <button type="button" class="icon-btn" *ngIf="account.role === 'viewer'"
+                  title="Make editor" aria-label="Make editor" (click)="setRole(account.uid, 'editor')">
+                  <mat-icon>lock_open</mat-icon>
+                </button>
+                <button type="button" class="icon-btn" *ngIf="account.role === 'editor'"
+                  title="Revoke edit access" aria-label="Revoke edit access" (click)="setRole(account.uid, 'viewer')">
+                  <mat-icon>lock</mat-icon>
+                </button>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   <ng-template #noMembers><p>No members available.</p></ng-template>
 </section>
@@ -31,6 +71,47 @@
   </div>
   <div class="actions-row">
     <button mat-flat-button color="primary" (click)="store.addMember()">Add Member</button>
+  </div>
+</section>
+
+<section class="state-card" *ngIf="auth.isOwner && unlinkedAccounts.length">
+  <h2 class="section-title">Accounts without a member ({{ unlinkedAccounts.length }})</h2>
+  <p class="dashboard-subtitle">
+    Logins that don't match anyone in the members list — test accounts, or
+    someone removed from the group whose login still exists.
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let account of unlinkedAccounts">
+          <td class="mono-cell">
+            &#64;{{ account.username }}
+            <span class="test-account-tag" *ngIf="account.isTestAccount">test</span>
+          </td>
+          <td>{{ account.role }}</td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="icon-btn" *ngIf="account.role === 'viewer'"
+                title="Make editor" aria-label="Make editor" (click)="setRole(account.uid, 'editor')">
+                <mat-icon>lock_open</mat-icon>
+              </button>
+              <button type="button" class="icon-btn" *ngIf="account.role === 'editor'"
+                title="Revoke edit access" aria-label="Revoke edit access" (click)="setRole(account.uid, 'viewer')">
+                <mat-icon>lock</mat-icon>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </section>
 

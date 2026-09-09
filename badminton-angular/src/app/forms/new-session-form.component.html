@@ -1,0 +1,177 @@
+<div class="new-session-body">
+  <div class="new-session-form">
+
+    <div class="field-grid field-grid-3">
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Date *</mat-label>
+        <input matInput [matDatepicker]="sessionDatePicker"
+          [(ngModel)]="sessionDateValue"
+          (ngModelChange)="onDateSelected($event)"
+          placeholder="Pick a date" readonly />
+        <mat-hint *ngIf="store.newSessionDate">{{ store.newSessionDate }}</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="sessionDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #sessionDatePicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Time</mat-label>
+        <input matInput type="text" [(ngModel)]="store.newSessionTime" placeholder="e.g. 7:00 – 9:00 PM" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tab-field">
+        <mat-label>Venue / court</mat-label>
+        <input matInput type="text" [(ngModel)]="store.newSessionVenue" placeholder="e.g. Smash Arena C3" />
+        <mat-hint *ngIf="store.lastUsedVenue && !store.newSessionVenue">Last used: {{ store.lastUsedVenue }}</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <div class="form-block">
+      <div class="micro-label">COSTS</div>
+      <div class="field-grid field-grid-3">
+        <mat-form-field appearance="outline" class="tab-field">
+          <mat-label>Court fee</mat-label>
+          <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
+          <input matInput type="number" min="0" [(ngModel)]="store.newSessionCourtFee" placeholder="0" />
+          <mat-hint>Whole booking, not per head</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="tab-field">
+          <mat-label>Shuttles used</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="store.newSessionShuttleCount" placeholder="0" />
+          <mat-hint>Counted into the split</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="tab-field">
+          <mat-label>Price / shuttle</mat-label>
+          <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
+          <input matInput type="number" min="0" [(ngModel)]="store.newSessionShuttlePrice" placeholder="0" />
+          <mat-hint>Group default</mat-hint>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="form-block">
+      <div class="block-head">
+        <div class="micro-label">WHO PLAYED · {{ store.newSessionAttendees.length }} SELECTED</div>
+        <div class="block-head-actions">
+          <button type="button" class="link-btn" (click)="store.copyAttendeesFromLastSession()">Copy from last session</button>
+          <button type="button" class="link-btn" (click)="store.selectAllNewSessionAttendees()">Select all</button>
+        </div>
+      </div>
+
+      <div #memberChipWrapper>
+        <mat-form-field appearance="outline" class="tab-field member-chip-field">
+          <mat-label>Members in session ({{ store.newSessionAttendees.length }} / {{ store.data?.members?.length || 0 }})</mat-label>
+          <mat-chip-grid #chipGrid aria-label="Session players">
+            <mat-chip
+              *ngFor="let member of store.newSessionAttendeeMembers"
+              [removable]="true"
+              (removed)="store.removeNewSessionAttendee(member.id)"
+              class="member-chip">
+              {{ member.name }}
+              <button matChipRemove aria-label="Remove player">×</button>
+            </mat-chip>
+          </mat-chip-grid>
+          <input
+            #memberInput
+            matInput
+            [ngModel]="store.newSessionMemberQuery"
+            (ngModelChange)="store.newSessionMemberQuery = $event"
+            [matChipInputFor]="chipGrid"
+            [matAutocomplete]="membersAuto"
+            placeholder="Type a name to add…" />
+          <mat-autocomplete
+            #membersAuto="matAutocomplete"
+            [panelWidth]="memberPickerWidth"
+            (optionSelected)="onPlayerSelected($event)">
+            <mat-option *ngFor="let member of store.newSessionCandidateMembers" [value]="member.id" class="member-ac-option">
+              {{ member.name }}
+            </mat-option>
+            <mat-option *ngIf="!store.newSessionCandidateMembers.length" disabled class="member-ac-empty">
+              All members added
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="form-block">
+      <div class="block-head">
+        <div class="micro-label">WHO PAID THE VENUE</div>
+        <span class="block-head-note">Collected Rs {{ store.sessionCost | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="payment-row" *ngFor="let payment of store.newSessionPayments; let i = index">
+        <mat-form-field appearance="outline" class="tab-field">
+          <mat-label>Player</mat-label>
+          <mat-select [(ngModel)]="payment.memberId">
+            <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="tab-field">
+          <mat-label>Amount</mat-label>
+          <span matTextPrefix class="rs-prefix">Rs&nbsp;</span>
+          <input matInput type="number" min="0" [(ngModel)]="payment.amount" placeholder="0" />
+        </mat-form-field>
+
+        <button
+          type="button"
+          class="remove-payer-btn"
+          aria-label="Remove payer"
+          [disabled]="store.newSessionPayments.length === 1"
+          (click)="store.removePaymentRow(i)">×</button>
+      </div>
+
+      <button type="button" class="add-payer-btn" (click)="store.addPaymentRow()">+ Add payer</button>
+    </div>
+
+    <mat-form-field appearance="outline" class="tab-field full-width">
+      <mat-label>Notes</mat-label>
+      <input matInput type="text" maxlength="140" [(ngModel)]="store.newSessionNotes"
+        placeholder="e.g. Extra shuttle used, Naveen left early" />
+      <mat-hint align="end">{{ (store.newSessionNotes || '').length }} / 140</mat-hint>
+    </mat-form-field>
+
+    <div class="actions-row">
+      <button mat-flat-button color="primary" (click)="save()">Save session</button>
+      <button mat-stroked-button type="button" (click)="cancelled.emit()">Cancel</button>
+    </div>
+  </div>
+
+  <aside class="live-split">
+    <div class="micro-label">LIVE SPLIT</div>
+
+    <div class="split-line">
+      <span>Court</span>
+      <span>Rs {{ (store.newSessionCourtFee || 0) | number:'1.0-0' }}</span>
+    </div>
+    <div class="split-line">
+      <span>Shuttles {{ store.newSessionShuttleCount || 0 }} × {{ store.newSessionShuttlePrice || 0 }}</span>
+      <span>Rs {{ store.newSessionShuttleTotal | number:'1.0-0' }}</span>
+    </div>
+
+    <div class="split-total">
+      <span>TOTAL</span>
+      <strong>Rs {{ store.newSessionCost | number:'1.0-0' }}</strong>
+    </div>
+
+    <div class="split-perhead">
+      <span>{{ store.newSessionAttendees.length }} player{{ store.newSessionAttendees.length === 1 ? '' : 's' }}</span>
+      <strong>Rs {{ store.newSessionPerHead | number:'1.0-0' }} / head</strong>
+    </div>
+
+    <p class="split-note" *ngIf="store.newSessionCost > 0">
+      Rs {{ store.sessionCost | number:'1.0-0' }} collected vs Rs {{ store.newSessionCost | number:'1.0-0' }} cost —
+      <strong *ngIf="store.newSessionShortfall === 0">fully covered.</strong>
+      <strong *ngIf="store.newSessionShortfall > 0">Rs {{ store.newSessionShortfall | number:'1.0-0' }} short.</strong>
+      <strong *ngIf="store.newSessionShortfall < 0">Rs {{ -store.newSessionShortfall | number:'1.0-0' }} over.</strong>
+      <ng-container *ngIf="store.newSessionAttendees.length">
+        Everyone who played owes Rs {{ store.newSessionPerHead | number:'1.0-0' }} to the payers.
+      </ng-container>
+    </p>
+    <p class="split-note split-note-empty" *ngIf="store.newSessionCost <= 0">
+      Enter a court fee or shuttle count to see the split.
+    </p>
+  </aside>
+</div>

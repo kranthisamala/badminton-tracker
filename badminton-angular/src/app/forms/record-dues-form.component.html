@@ -1,0 +1,37 @@
+<div class="field-grid field-grid-3">
+  <mat-form-field appearance="outline" class="tab-field">
+    <mat-label>Paid By</mat-label>
+    <mat-select [(ngModel)]="store.duesFrom">
+      <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="tab-field">
+    <mat-label>Paid To</mat-label>
+    <mat-select [(ngModel)]="store.duesTo">
+      <mat-option *ngFor="let member of store.data?.members" [value]="member.id">{{ member.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="tab-field">
+    <mat-label>Amount (Rs)</mat-label>
+    <input matInput type="number" min="0" [(ngModel)]="store.duesAmount" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="tab-field">
+    <mat-label>Date</mat-label>
+    <input matInput type="date" [(ngModel)]="store.duesDate" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="tab-field">
+    <mat-label>Note (optional)</mat-label>
+    <input matInput type="text" [(ngModel)]="store.duesNote" placeholder="e.g. UPI transfer" />
+  </mat-form-field>
+</div>
+
+<div class="actions-row">
+  <button mat-flat-button color="primary" (click)="save()">
+    {{ store.duesEditId !== null ? 'Save Changes' : 'Record Payment' }}
+  </button>
+  <button mat-stroked-button type="button" (click)="cancelled.emit()">Cancel</button>
+</div>

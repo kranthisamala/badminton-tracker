@@ -5,7 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MemberSummary, Settlement } from '../models';
+import { DuesPayment, MemberSummary, Settlement } from '../models';
 import { TrackerStoreService } from '../state/tracker-store.service';
 
 interface BalanceRow extends MemberSummary {
@@ -47,5 +47,11 @@ export class DuesTabComponent {
     this.store.duesAmount = settlement.amount;
     this.store.duesDate = new Date().toISOString().split('T')[0];
     this.store.duesNote = '';
+    this.store.showRecordDuesModal = true;
+  }
+
+  editPayment(payment: DuesPayment): void {
+    this.store.editDuesPayment(payment);
+    this.store.showRecordDuesModal = true;
   }
 }

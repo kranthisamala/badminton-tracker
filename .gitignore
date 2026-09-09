@@ -8,3 +8,9 @@ firestore-debug.log
 # never commit. See scripts/provision-member-accounts.js.
 serviceAccountKey*.json
 *-firebase-adminsdk-*.json
+
+# Timestamped Firestore snapshots written by the migration/backfill scripts.
+backup-trackerData-*.json
+
+# Local-only credentials (test account passwords etc). Never commit.
+*.local.json

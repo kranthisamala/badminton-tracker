@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from '../auth.service';
-import { DuesPayment, Member, MemberReport, MemberSummary, Payment, Session, Settlement, TrackerData } from '../models';
+import { DuesPayment, Member, MemberReport, MemberSummary, Payment, Session, SessionCostEdit, Settlement, TrackerData } from '../models';
 import { TrackerDataService } from '../tracker-data.service';
 
 @Injectable({ providedIn: 'root' })
@@ -15,10 +15,13 @@ export class TrackerStoreService {
   newSessionDate = '';
   newSessionNotes = '';
   newSessionPayments: Payment[] = [{ memberId: 0, amount: 0 }];
-
-  quickAttendanceSessionId: number | null = null;
-  quickAttendanceQuery = '';
-  quickAttendanceSelectedMembers: number[] = [];
+  newSessionTime = '';
+  newSessionVenue = '';
+  newSessionCourtFee: number | null = null;
+  newSessionShuttleCount: number | null = null;
+  newSessionShuttlePrice: number | null = null;
+  newSessionAttendees: number[] = [];
+  newSessionMemberQuery = '';
 
   duesEditId: number | null = null;
   duesFrom = 0;
@@ -30,7 +33,12 @@ export class TrackerStoreService {
   newMemberName = '';
 
   pendingDrilldownMemberId: number | null = null;
-  pendingQuickDuesOpen = false;
+
+  // The "+ New session" / "Record dues" popups are opened from the app shell
+  // header, and dues editing opens the same popup from the Dues tab, so the
+  // open/closed state lives here rather than in either component.
+  showNewSessionModal = false;
+  showRecordDuesModal = false;
 
   constructor(
     private readonly trackerDataService: TrackerDataService,
@@ -88,6 +96,80 @@ export class TrackerStoreService {
     return this.newSessionPayments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
   }
 
+  get newSessionShuttleTotal(): number {
+    return (Number(this.newSessionShuttleCount) || 0) * (Number(this.newSessionShuttlePrice) || 0);
+  }
+
+  get newSessionHasBreakdown(): boolean {
+    return (Number(this.newSessionCourtFee) || 0) > 0 || this.newSessionShuttleTotal > 0;
+  }
+
+  // What the session actually cost. Falls back to the collected total when no
+  // court-fee/shuttle breakdown was entered, matching how older sessions work.
+  get newSessionCost(): number {
+    if (!this.newSessionHasBreakdown) return this.sessionCost;
+    return (Number(this.newSessionCourtFee) || 0) + this.newSessionShuttleTotal;
+  }
+
+  get newSessionPerHead(): number {
+    if (!this.newSessionAttendees.length) return 0;
+    return this.newSessionCost / this.newSessionAttendees.length;
+  }
+
+  get newSessionShortfall(): number {
+    return this.newSessionCost - this.sessionCost;
+  }
+
+  get newSessionAttendeeMembers(): Member[] {
+    if (!this.data) return [];
+    return this.newSessionAttendees
+      .map(id => this.memberById(id))
+      .filter((member): member is Member => !!member);
+  }
+
+  get newSessionCandidateMembers(): Member[] {
+    if (!this.data) return [];
+    const query = this.newSessionMemberQuery.trim().toLowerCase();
+    const picked = new Set(this.newSessionAttendees);
+    return this.data.members.filter(
+      member => !picked.has(member.id) && (!query || member.name.toLowerCase().includes(query))
+    );
+  }
+
+  get lastSession(): Session | null {
+    if (!this.data?.sessions.length) return null;
+    return this.sortedSessions[0];
+  }
+
+  addNewSessionAttendee(memberId: number): void {
+    if (!this.newSessionAttendees.includes(memberId)) {
+      this.newSessionAttendees = [...this.newSessionAttendees, memberId];
+    }
+    this.newSessionMemberQuery = '';
+  }
+
+  removeNewSessionAttendee(memberId: number): void {
+    this.newSessionAttendees = this.newSessionAttendees.filter(id => id !== memberId);
+  }
+
+  selectAllNewSessionAttendees(): void {
+    this.newSessionAttendees = (this.data?.members || []).map(member => member.id);
+  }
+
+  copyAttendeesFromLastSession(): void {
+    const last = this.lastSession;
+    if (!last || !this.data) {
+      this.errorMessage = 'No previous session to copy from.';
+      return;
+    }
+    const previous = this.data.attendance[String(last.id)] || [];
+    if (!previous.length) {
+      this.errorMessage = 'The last session has no attendance recorded.';
+      return;
+    }
+    this.newSessionAttendees = previous.filter(id => !!this.memberById(id));
+  }
+
   get sortedSessions(): Session[] {
     if (!this.data) return [];
     return [...this.data.sessions].sort((a, b) => b.id - a.id);
@@ -96,35 +178,6 @@ export class TrackerStoreService {
   get duesRecords(): DuesPayment[] {
     if (!this.data) return [];
     return [...(this.data.duesPayments || [])].sort((a, b) => b.id - a.id);
-  }
-
-  get quickSession(): Session | null {
-    if (!this.data || !this.data.sessions.length) return null;
-    const found = this.data.sessions.find(session => session.id === this.quickAttendanceSessionId);
-    return found || this.data.sessions[this.data.sessions.length - 1];
-  }
-
-  get quickSessionAttendees(): number[] {
-    const session = this.quickSession;
-    if (!session || !this.data) return [];
-    return (this.data.attendance[String(session.id)] || []).slice();
-  }
-
-  get quickAttendanceAvailableMembers(): Member[] {
-    if (!this.data) return [];
-    const selected = new Set(this.quickSessionAttendees);
-    return this.data.members.filter(member => !selected.has(member.id));
-  }
-
-  get quickAttendanceDropdownMembers(): Member[] {
-    const query = this.quickAttendanceQuery.trim().toLowerCase();
-    return this.quickAttendanceAvailableMembers.filter(member =>
-      !query || member.name.toLowerCase().includes(query)
-    );
-  }
-
-  get filteredQuickSuggestions(): Member[] {
-    return this.quickAttendanceDropdownMembers.slice(0, 12);
   }
 
   addPaymentRow(): void {
@@ -145,10 +198,16 @@ export class TrackerStoreService {
       .map(payment => ({ memberId: Number(payment.memberId), amount: Number(payment.amount) || 0 }))
       .filter(payment => payment.memberId && payment.amount > 0);
 
-    const cost = payments.reduce((sum, payment) => sum + payment.amount, 0);
+    const cost = this.newSessionCost;
+    const attendees = this.newSessionAttendees.filter(memberId => !!this.memberById(memberId));
 
-    if (!date || cost <= 0) {
-      this.errorMessage = 'Please enter session date and valid payments.';
+    if (!date) {
+      this.errorMessage = 'Please pick a session date.';
+      return;
+    }
+
+    if (cost <= 0) {
+      this.errorMessage = 'Enter a court fee or shuttle cost, or record what was paid.';
       return;
     }
 
@@ -157,11 +216,25 @@ export class TrackerStoreService {
       return;
     }
 
+    if (!attendees.length) {
+      this.errorMessage = 'Select who played — the cost is split across them.';
+      return;
+    }
+
     const id = this.data.nextId;
     this.data.nextId += 1;
 
-    this.data.sessions.push({ id, date, cost, payments, notes });
-    this.data.attendance[String(id)] = [];
+    const session: Session = { id, date, cost, payments, notes };
+    if (this.newSessionTime.trim()) session.time = this.newSessionTime.trim();
+    if (this.newSessionVenue.trim()) session.venue = this.newSessionVenue.trim();
+    if (this.newSessionHasBreakdown) {
+      session.courtFee = Number(this.newSessionCourtFee) || 0;
+      session.shuttleCount = Number(this.newSessionShuttleCount) || 0;
+      session.shuttlePrice = Number(this.newSessionShuttlePrice) || 0;
+    }
+
+    this.data.sessions.push(session);
+    this.data.attendance[String(id)] = attendees;
 
     this.recomputeDerivedState();
     this.resetSessionForm();
@@ -179,7 +252,7 @@ export class TrackerStoreService {
     this.persistData('Session deleted successfully.');
   }
 
-  updateSession(id: number, date: string, notes: string, payments: Payment[]): void {
+  updateSession(id: number, date: string, notes: string, payments: Payment[], breakdown?: SessionCostEdit): void {
     if (!this.data) return;
     const session = this.data.sessions.find(s => s.id === id);
     if (!session) { this.errorMessage = 'Session not found.'; return; }
@@ -187,7 +260,13 @@ export class TrackerStoreService {
     const valid = payments
       .map(p => ({ memberId: Number(p.memberId), amount: Number(p.amount) || 0 }))
       .filter(p => p.memberId && p.amount > 0);
-    const cost = valid.reduce((sum, p) => sum + p.amount, 0);
+    const collected = valid.reduce((sum, p) => sum + p.amount, 0);
+
+    const courtFee = Number(breakdown?.courtFee) || 0;
+    const shuttleCount = Number(breakdown?.shuttleCount) || 0;
+    const shuttlePrice = Number(breakdown?.shuttlePrice) || 0;
+    const hasBreakdown = courtFee > 0 || shuttleCount * shuttlePrice > 0;
+    const cost = hasBreakdown ? courtFee + shuttleCount * shuttlePrice : collected;
 
     if (!date.trim() || cost <= 0) {
       this.errorMessage = 'Date and at least one valid payment required.';
@@ -199,104 +278,23 @@ export class TrackerStoreService {
     session.payments = valid;
     session.cost = cost;
 
+    const time = breakdown?.time?.trim();
+    const venue = breakdown?.venue?.trim();
+    if (time) session.time = time; else delete session.time;
+    if (venue) session.venue = venue; else delete session.venue;
+
+    if (hasBreakdown) {
+      session.courtFee = courtFee;
+      session.shuttleCount = shuttleCount;
+      session.shuttlePrice = shuttlePrice;
+    } else {
+      delete session.courtFee;
+      delete session.shuttleCount;
+      delete session.shuttlePrice;
+    }
+
     this.recomputeDerivedState();
     this.persistData('Session updated successfully.');
-  }
-
-  setQuickAttendanceSession(id: number): void {
-    this.quickAttendanceSessionId = id;
-    this.quickAttendanceSelectedMembers = [];
-    this.quickAttendanceQuery = '';
-  }
-
-  isQuickAttendanceMemberPicked(memberId: number): boolean {
-    return this.quickAttendanceSelectedMembers.includes(memberId);
-  }
-
-  toggleQuickAttendanceMemberSelection(memberId: number, checked: boolean): void {
-    if (checked) {
-      if (!this.quickAttendanceSelectedMembers.includes(memberId)) {
-        this.quickAttendanceSelectedMembers = [...this.quickAttendanceSelectedMembers, memberId];
-      }
-      return;
-    }
-    this.quickAttendanceSelectedMembers = this.quickAttendanceSelectedMembers.filter(id => id !== memberId);
-  }
-
-  clearQuickAttendanceSelection(): void {
-    this.quickAttendanceSelectedMembers = [];
-  }
-
-  addSelectedQuickAttendanceMembers(): void {
-    if (!this.data || !this.quickSession) return;
-
-    const picked = [...this.quickAttendanceSelectedMembers];
-    if (!picked.length) {
-      this.errorMessage = 'Select at least one member to add.';
-      return;
-    }
-
-    const key = String(this.quickSession.id);
-    if (!this.data.attendance[key]) this.data.attendance[key] = [];
-    const attendees = this.data.attendance[key];
-
-    const added: number[] = [];
-    picked.forEach(memberId => {
-      if (!attendees.includes(memberId)) {
-        attendees.push(memberId);
-        added.push(memberId);
-      }
-    });
-
-    if (!added.length) {
-      this.errorMessage = 'Selected members are already added.';
-      return;
-    }
-
-    this.recomputeDerivedState();
-    this.quickAttendanceSelectedMembers = [];
-    this.quickAttendanceQuery = '';
-    this.persistData(added.length + ' members added to attendance.');
-  }
-
-  addQuickAttendanceMember(inputMember?: string): boolean {
-    if (!this.data || !this.quickSession) return false;
-
-    const typed = (inputMember || this.quickAttendanceQuery).trim();
-    if (!typed) {
-      this.errorMessage = 'Enter a member name to add.';
-      return false;
-    }
-
-    const member = this.data.members.find(m => m.name.toLowerCase() === typed.toLowerCase());
-    if (!member) {
-      this.errorMessage = 'Member not found.';
-      return false;
-    }
-
-    const key = String(this.quickSession.id);
-    if (!this.data.attendance[key]) this.data.attendance[key] = [];
-    if (this.data.attendance[key].includes(member.id)) {
-      this.errorMessage = member.name + ' is already added.';
-      return false;
-    }
-
-    this.data.attendance[key].push(member.id);
-    this.recomputeDerivedState();
-    this.quickAttendanceQuery = '';
-    this.persistData(member.name + ' added to attendance.');
-    return true;
-  }
-
-  removeQuickAttendanceMember(memberId: number): void {
-    if (!this.data || !this.quickSession) return;
-
-    const key = String(this.quickSession.id);
-    const arr = this.data.attendance[key] || [];
-    this.data.attendance[key] = arr.filter(id => id !== memberId);
-
-    this.recomputeDerivedState();
-    this.persistData(this.memberName(memberId) + ' removed from attendance.');
   }
 
   toggleAttendance(sessionId: number, memberId: number): void {
@@ -597,9 +595,14 @@ export class TrackerStoreService {
       this.duesDate = new Date().toISOString().split('T')[0];
     }
 
-    if (this.data.sessions.length && !this.quickAttendanceSessionId) {
-      this.quickAttendanceSessionId = this.data.sessions[this.data.sessions.length - 1].id;
+    if (this.newSessionShuttlePrice === null) {
+      const priced = this.sortedSessions.find(session => !!session.shuttlePrice);
+      this.newSessionShuttlePrice = priced?.shuttlePrice ?? null;
     }
+  }
+
+  get lastUsedVenue(): string {
+    return this.sortedSessions.find(session => !!session.venue)?.venue || '';
   }
 
   private persistData(successMessage: string): void {
@@ -631,6 +634,12 @@ export class TrackerStoreService {
     this.newSessionDate = '';
     this.newSessionNotes = '';
     this.newSessionPayments = [{ memberId: this.data?.members[0]?.id || 0, amount: 0 }];
+    this.newSessionTime = '';
+    this.newSessionVenue = '';
+    this.newSessionCourtFee = null;
+    this.newSessionShuttleCount = null;
+    this.newSessionAttendees = [];
+    this.newSessionMemberQuery = '';
   }
 
   private resetDuesForm(): void {

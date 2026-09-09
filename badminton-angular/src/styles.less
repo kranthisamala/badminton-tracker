@@ -12,6 +12,20 @@ body {
   font-family: 'Archivo', system-ui, sans-serif;
 }
 
+// Modernist heading baseline — bold, tight tracking, ink by default.
+// Applied at element-selector specificity so any context-specific rule
+// (font-size, color, margin) elsewhere still wins; this only guarantees
+// every heading in the app picks up the right weight/family/tracking
+// without having to repeat it on every card/modal/section heading class.
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: @ink;
+  margin: 0 0 8px;
+}
+
 html {
   color-scheme: light;
 }
@@ -579,8 +593,8 @@ html {
 
 .section-title {
   margin: 0 0 12px;
-  color: @text-soft;
-  font-size: 1rem;
+  color: @ink;
+  font-size: 1.05rem;
 }
 
 .quick-field {
@@ -616,20 +630,21 @@ html {
 // Chips inside the field — flat tag style matching the Modernist system
 .member-chip.mat-mdc-chip {
   --mdc-chip-container-shape-radius: 0;
-  --mdc-chip-elevated-container-color: @accent-tint;
-  --mdc-chip-label-text-color: @accent-active;
-  --mdc-chip-with-trailing-icon-trailing-icon-color: @accent-active;
-  --mdc-chip-with-icon-icon-color: @accent-active;
+  --mdc-chip-elevated-container-color: @surface-strong;
+  --mdc-chip-label-text-color: @bg-page;
+  --mdc-chip-with-trailing-icon-trailing-icon-color: @accent-light;
+  --mdc-chip-with-icon-icon-color: @accent-light;
 
-  border: 1px solid @accent;
-  font-size: 0.82rem;
+  border: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
 
   // The ×  remove button
   .mat-mdc-chip-remove {
     font-size: 1rem;
-    color: @icon-muted;
+    color: @accent-light;
     opacity: 1;
-    &:hover { color: @danger; }
+    &:hover { color: @bg-page; }
   }
 }
 
@@ -723,6 +738,16 @@ html {
   font-family: 'Archivo', system-ui, sans-serif;
 }
 
+// Rendered height of a Material outline box given the infix padding below
+// (20 top + 14 bottom + ~24 line). Controls beside a field — the payer-row
+// × button — use this so their edges line up with the field boxes.
+@field-box-height: 58px;
+
+// How far the floated label hangs BELOW the box's top edge. The label is
+// ~13.5px tall and centred on that edge, so ~7px falls inside the white box;
+// only that strip needs the card colour behind it.
+@field-label-band: 8px;
+
 // Material's own defaults read as cramped against the 2px Modernist
 // outline — give the input area explicit, generous breathing room on
 // all sides instead.
@@ -737,6 +762,29 @@ html {
 .mat-mdc-form-field .mat-mdc-form-field-flex {
   padding-left: 0 !important;
   padding-right: 0 !important;
+}
+
+// The outlined variant renders a transparent container, so the
+// container-color token above never paints. The design puts every input on
+// white, so set it on the wrapper (the box inside the outline) directly.
+// The subscript/hint sits outside this element and stays on the card.
+.mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background: @bg-input;
+  border-radius: 0;
+}
+
+// The floated label straddles the wrapper's top edge, so with a white wrapper
+// its lower half sat on white and its upper half on the card. The design
+// treats the label as a solid chip notched into the border, so the whole notch
+// — not just the label's own text box — has to carry the card colour, or
+// slivers of white show either side of the label. Painting the notch's top
+// band covers exactly the strip the label occupies.
+.mat-mdc-form-field .mdc-notched-outline--notched .mdc-notched-outline__notch {
+  background: linear-gradient(to bottom, @bg-card 0, @bg-card @field-label-band, transparent @field-label-band);
+}
+
+.mat-mdc-form-field .mdc-floating-label--float-above {
+  background: @bg-card;
 }
 
 .mat-mdc-form-field input.mat-mdc-input-element,
@@ -833,9 +881,346 @@ html {
 
 .payment-row {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 160px 52px;
+  gap: 12px;
   margin-bottom: 8px;
+  align-items: start;
+}
+
+.remove-payer-btn {
+  width: @field-box-height;
+  height: @field-box-height;
+  flex: none;
+  background: transparent;
+  border: 2px solid @border-strong;
+  color: @ink;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { background: @accent-tint; }
+
+  &:disabled {
+    border-color: @border-base;
+    color: @text-neutral;
+    cursor: not-allowed;
+  }
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: 2px solid @border-strong;
+  color: @ink;
+  cursor: pointer;
+
+  &:hover { background: fade(@ink, 8%); }
+
+  &.danger {
+    border-color: @danger-border;
+    color: @danger;
+
+    &:hover { background: @danger-bg; }
+  }
+
+  .mat-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+    line-height: 17px;
+  }
+}
+
+.mono-cell {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.78rem;
+  color: @text-muted;
+}
+
+.text-muted-cell {
+  color: @text-neutral;
+  font-style: italic;
+}
+
+.test-account-tag {
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: @surface-strong;
+  color: @bg-page;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// ── New session (mockup 1d): form + live split ──
+.micro-label {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: @text-muted;
+  text-transform: uppercase;
+}
+
+.new-session {
+  background: @bg-card;
+  border: 1px solid @border-base;
+  margin-bottom: 18px;
+}
+
+.new-session-head {
+  padding: 16px 22px;
+  border-bottom: 2px solid @border-strong;
+
+  h2 {
+    margin: 9px 0 0;
+    font-size: 1.5rem;
+  }
+}
+
+.new-session-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: start;
+}
+
+.new-session-form {
+  padding: 20px 22px;
+  min-width: 0;
+}
+
+.field-grid {
+  display: grid;
+  // Generous row gap: when these columns wrap, a field's hint text sits
+  // directly under it and would otherwise collide with the next field's
+  // floating label.
+  gap: 16px 12px;
+  margin-bottom: 8px;
+}
+
+.field-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-block {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid @border-base;
+
+  // Material's floating label sits on the field's top border, so anything
+  // directly above a field needs clearance or the two collide.
+  > .micro-label {
+    display: block;
+    margin-bottom: 16px;
+  }
+}
+
+.new-session-form > .full-width {
+  margin-top: 22px;
+}
+
+.block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.block-head-actions {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.block-head-note {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: @text-muted;
+}
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: @accent-active;
+
+  &:hover { text-decoration: underline; }
+}
+
+// Material renders matTextPrefix outside the infix, so it gets none of the
+// infix's horizontal padding and would otherwise sit on the field border.
+.mat-mdc-form-field-text-prefix:has(.rs-prefix) {
+  padding-left: 14px;
+}
+
+.rs-prefix {
+  color: @text-muted;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding-right: 6px;
+}
+
+.add-payer-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  background: transparent;
+  border: 2px solid @border-strong;
+  color: @ink;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover { background: fade(@ink, 6%); }
+}
+
+.live-split {
+  padding: 20px 18px;
+  border-left: 1px solid @border-base;
+  position: sticky;
+  top: 12px;
+}
+
+.split-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: @text-soft;
+}
+
+.split-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 2px solid @border-strong;
+
+  span {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: @text-muted;
+  }
+
+  strong {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: @ink;
+  }
+}
+
+.split-perhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 0.76rem;
+  color: @text-muted;
+
+  strong {
+    color: @ink;
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
+}
+
+.split-note {
+  margin: 18px 0 0;
+  padding: 12px;
+  border: 2px solid @border-strong;
+  background: @accent-tint;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: @text-main;
+}
+
+.split-note-empty {
+  border-color: @border-base;
+  background: transparent;
+  color: @text-muted;
+}
+
+.session-meta,
+.session-breakdown,
+.session-players {
+  margin: 4px 0 0;
+  font-size: 0.74rem;
+  color: @text-muted;
+}
+
+.session-players {
+  font-weight: 600;
+  color: @text-soft;
+}
+
+@media (max-width: 900px) {
+  .new-session-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .live-split {
+    border-left: 0;
+    border-top: 2px solid @border-strong;
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .payment-row {
+    grid-template-columns: minmax(0, 1fr) 52px;
+  }
+
+  // Stack the two fields in column 1; the × sits beside them spanning both.
+  .payment-row mat-form-field {
+    grid-column: 1;
+  }
+
+  .payment-row .remove-payer-btn {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .new-session-form,
+  .new-session-head {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 }
 
 .actions-row {
@@ -883,7 +1268,7 @@ html {
 
 .session-head h3 {
   margin: 0;
-  color: @text-soft;
+  color: @ink;
   font-size: 1rem;
 }
 
@@ -957,7 +1342,7 @@ html {
 
 .player-card h2 {
   margin: 0 0 10px;
-  color: @text-soft;
+  color: @ink;
   font-size: 1.02rem;
 }
 
@@ -1060,7 +1445,9 @@ button.balance:focus-visible {
 
 .dues-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  // The table needs enough room for its Balance column to land on screen
+  // without horizontal scrolling — see .table-wrap's min-width.
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: 20px;
 }
 
@@ -1121,7 +1508,7 @@ button.balance:focus-visible {
   table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 760px;
+    min-width: 680px;
   }
 
   th,
@@ -1178,6 +1565,14 @@ button.balance:focus-visible {
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
+  color: @text-main;
+  font-weight: 700;
+}
+
+.chip small {
+  color: @text-muted;
+  font-weight: 500;
+  font-size: 0.82rem;
 }
 
 .chip-actions {
@@ -1194,7 +1589,7 @@ button.balance:focus-visible {
 }
 
 .dashboard-subtitle {
-  margin: 0;
+  margin: 0 0 14px;
   color: @text-neutral;
   font-size: 0.86rem;
 }
@@ -1207,7 +1602,7 @@ button.balance:focus-visible {
 
 .chart-card h3 {
   margin: 0 0 12px;
-  color: @text-soft;
+  color: @ink;
   font-size: 0.95rem;
 }
 
@@ -1242,11 +1637,19 @@ button.balance:focus-visible {
 
 .modal-card {
   width: min(760px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   background: @bg-card;
   border: 1px solid @border-base;
   border-radius: 0;
   padding: 16px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+// Wide enough for the session form's three-column rows to stay on one line
+// alongside the live-split panel. Overrides .modal-card's explicit width.
+.modal-card.modal-card-wide {
+  width: min(1180px, 100%);
 }
 
 .modal-head {
@@ -1259,7 +1662,7 @@ button.balance:focus-visible {
 
 .modal-head h3 {
   margin: 0;
-  color: @text-soft;
+  color: @ink;
   font-size: 1rem;
 }
 

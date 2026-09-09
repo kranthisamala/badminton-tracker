@@ -18,6 +18,7 @@ export interface RoleRecord {
   mustChangePassword: boolean;
   contactEmail?: string;
   createdAt: string;
+  isTestAccount?: boolean;
 }
 
 // Must match the domain used by scripts/provision-member-accounts.js —

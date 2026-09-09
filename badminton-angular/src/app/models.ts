@@ -9,12 +9,28 @@ export interface Payment {
   amount: number;
 }
 
+// cost is the source of truth for the split. On sessions saved with a cost
+// breakdown it equals courtFee + shuttleCount * shuttlePrice; older sessions
+// have no breakdown and cost is simply what was collected.
 export interface Session {
   id: number;
   date: string;
   cost: number;
   payments: Payment[];
   notes: string;
+  time?: string;
+  venue?: string;
+  courtFee?: number;
+  shuttleCount?: number;
+  shuttlePrice?: number;
+}
+
+export interface SessionCostEdit {
+  time?: string;
+  venue?: string;
+  courtFee?: number | null;
+  shuttleCount?: number | null;
+  shuttlePrice?: number | null;
 }
 
 export interface DuesPayment {
